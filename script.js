@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             downloadImageBtn.addEventListener('click', async () => {
                 showToast('Generating screenshot... please wait.');
                 try {
-                    const dashboard = document.querySelector('.main-content');
+                    const dashboard = document.querySelector('.content-section.active');
                     const canvas = await html2canvas(dashboard, {
                         backgroundColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#0f172a' : '#f0f2f5',
                         scale: 2, // High quality
