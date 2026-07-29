@@ -651,6 +651,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideLoading() {
         document.getElementById('loadingOverlay').classList.add('hidden');
+    }
+
     function showToast(message, type = 'success') {
         clearTimeout(toastTimeout);
         
