@@ -56,15 +56,22 @@ class DashboardManager {
 
     updateDashboardSummary(stats, internetData = [], smsData = []) {
         document.getElementById('statTotalCalls').textContent = stats.totalCalls;
+        document.getElementById('statIncoming').textContent = stats.incoming;
+        document.getElementById('statOutgoing').textContent = stats.outgoing;
+        document.getElementById('statMissed').textContent = stats.missed;
         
         let totalMb = 0;
         internetData.forEach(i => totalMb += i.dataMB);
         const gb = (totalMb / 1024).toFixed(2);
-        document.getElementById('statTotalInternet').textContent = `${gb} GB`;
+        
+        const statTotalInternet = document.getElementById('statTotalInternet');
+        if (statTotalInternet) statTotalInternet.textContent = `${gb} GB`;
         
         let totalSms = 0;
         smsData.forEach(s => totalSms += s.count);
-        document.getElementById('statTotalSMS').textContent = totalSms;
+        
+        const statTotalSMS = document.getElementById('statTotalSMS');
+        if (statTotalSMS) statTotalSMS.textContent = totalSms;
     }
 
     calculatePersonStats(logs) {

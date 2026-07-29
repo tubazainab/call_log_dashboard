@@ -838,3 +838,7 @@ a {
     .table-header-actions { flex-direction: column; align-items: stretch; }
     .search-box { width: 100%; }
 }
+
+.analytics-tabs { display: flex; gap: 1rem; }
+.analysis-tab-content { display: none; }
+.analysis-tab-content:not(.hidden) { display: block; }

@@ -59,10 +59,6 @@
                     <button class="btn btn-secondary" id="downloadImageBtn">
                         <i class="fa-solid fa-camera"></i> <span class="btn-text">Screenshot</span>
                     </button>
-                    <button class="btn btn-primary" id="importJioBtn">
-                        <i class="fa-solid fa-file-pdf"></i> <span class="btn-text">Import Bill</span>
-                    </button>
-                    <input type="file" id="jioPdfInput" accept="application/pdf" class="hidden">
                     
                     <div class="export-dropdown">
                         <button class="btn btn-secondary" id="exportBtn">
@@ -110,6 +106,12 @@
                         </div>
                     </div>
 
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                        <button class="btn btn-primary" id="importCallsBtn">
+                            <i class="fa-solid fa-file-pdf"></i> <span class="btn-text">Upload Call Logs</span>
+                        </button>
+                        <input type="file" id="callsPdfInput" accept="application/pdf" class="hidden">
+                    </div>
                     <!-- Summary Cards -->
                     <div class="summary-cards">
                         <div class="card glass-panel stat-card">
@@ -120,17 +122,21 @@
                             </div>
                         </div>
                         <div class="card glass-panel stat-card">
-                            <div class="stat-icon duration" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><i class="fa-solid fa-wifi"></i></div>
                             <div class="stat-info">
-                                <h3>Internet Usage</h3>
-                                <p id="statTotalInternet">0.00 GB</p>
+                                <h5><i class="fa-solid fa-arrow-down incoming-color"></i> Incoming</h5>
+                                <h4 id="statIncoming">0</h4>
                             </div>
                         </div>
                         <div class="card glass-panel stat-card">
-                            <div class="stat-icon avg" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;"><i class="fa-solid fa-comment-sms"></i></div>
                             <div class="stat-info">
-                                <h3>Total SMS</h3>
-                                <p id="statTotalSMS">0</p>
+                                <h5><i class="fa-solid fa-arrow-up outgoing-color"></i> Outgoing</h5>
+                                <h4 id="statOutgoing">0</h4>
+                            </div>
+                        </div>
+                        <div class="card glass-panel stat-card">
+                            <div class="stat-info">
+                                <h5><i class="fa-solid fa-phone-slash missed-color"></i> Missed</h5>
+                                <h4 id="statMissed">0</h4>
                             </div>
                         </div>
                     </div>
@@ -153,6 +159,30 @@
 
                 <!-- Internet Section -->
                 <section id="internet-section" class="content-section hidden">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                        <button class="btn btn-primary" id="importInternetBtn">
+                            <i class="fa-solid fa-file-pdf"></i> <span class="btn-text">Upload Internet Data</span>
+                        </button>
+                        <input type="file" id="internetPdfInput" accept="application/pdf" class="hidden">
+                    </div>
+                    <div class="summary-cards">
+                        <div class="card glass-panel stat-card">
+                            <div class="stat-icon duration" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><i class="fa-solid fa-wifi"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Internet</h3>
+                                <p id="statTotalInternet">0.00 GB</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Internet Charts Preview -->
+                    <div class="charts-grid mt-4 mb-4">
+                        <div class="card glass-panel chart-container">
+                            <h3>Internet Usage Over Time</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="internetLineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card glass-panel full-height-card">
                         <h2><i class="fa-solid fa-wifi text-primary"></i> Internet Data Logs</h2>
                         <div class="table-responsive mt-4">
@@ -178,6 +208,30 @@
 
                 <!-- SMS Section -->
                 <section id="sms-section" class="content-section hidden">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                        <button class="btn btn-primary" id="importSmsBtn">
+                            <i class="fa-solid fa-file-pdf"></i> <span class="btn-text">Upload SMS Logs</span>
+                        </button>
+                        <input type="file" id="smsPdfInput" accept="application/pdf" class="hidden">
+                    </div>
+                    <div class="summary-cards">
+                        <div class="card glass-panel stat-card">
+                            <div class="stat-icon avg" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;"><i class="fa-solid fa-comment-sms"></i></div>
+                            <div class="stat-info">
+                                <h3>Total SMS</h3>
+                                <p id="statTotalSMS">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- SMS Charts Preview -->
+                    <div class="charts-grid mt-4 mb-4">
+                        <div class="card glass-panel chart-container">
+                            <h3>SMS Activity Over Time</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="smsLineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card glass-panel full-height-card">
                         <h2><i class="fa-solid fa-comment-sms text-primary"></i> SMS Logs</h2>
                         <div class="table-responsive mt-4">
@@ -303,46 +357,65 @@
 
                 <!-- Analytics Section -->
                 <section id="analytics-section" class="content-section hidden">
-                    <div class="charts-grid-large">
-                        <div class="card glass-panel chart-container">
-                            <h3>Total Call Duration by Person</h3>
-                            <div class="canvas-wrapper">
-                                <canvas id="durationBarChart"></canvas>
+                    <div class="analytics-tabs mb-4">
+                        <button class="btn btn-secondary active" data-tab="analysis-calls" onclick="switchAnalysisTab('analysis-calls')">Calls Analysis</button>
+                        <button class="btn btn-secondary" data-tab="analysis-internet" onclick="switchAnalysisTab('analysis-internet')">Internet Analysis</button>
+                        <button class="btn btn-secondary" data-tab="analysis-sms" onclick="switchAnalysisTab('analysis-sms')">SMS Analysis</button>
+                    </div>
+
+                    <div id="analysis-calls" class="analysis-tab-content">
+                        <div class="charts-grid-large mb-4">
+                            <div class="card glass-panel chart-container">
+                                <h3>Total Call Duration by Person</h3>
+                                <div class="canvas-wrapper">
+                                    <canvas id="durationBarChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="card glass-panel chart-container">
+                                <h3>Total Calls by Person</h3>
+                                <div class="canvas-wrapper">
+                                    <canvas id="callsDoughnutChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="card glass-panel chart-container full-width">
+                                <h3>Top 10 People by Talk Time</h3>
+                                <div class="canvas-wrapper">
+                                    <canvas id="topTalkersChart"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="card glass-panel chart-container">
-                            <h3>Total Calls by Person</h3>
-                            <div class="canvas-wrapper">
-                                <canvas id="callsDoughnutChart"></canvas>
+                        <div class="grid-2-col">
+                            <div class="card glass-panel">
+                                <h3><i class="fa-solid fa-trophy text-gold"></i> Talk Time Leaderboard</h3>
+                                <ul class="leaderboard-list" id="leaderboardList">
+                                </ul>
                             </div>
-                        </div>
-                        <div class="card glass-panel chart-container full-width">
-                            <h3>Top 10 People by Talk Time</h3>
-                            <div class="canvas-wrapper">
-                                <canvas id="topTalkersChart"></canvas>
+                            <div class="card glass-panel">
+                                <h3><i class="fa-solid fa-users text-primary"></i> Person Statistics</h3>
+                                <div class="search-box mb-3">
+                                    <i class="fa-solid fa-search"></i>
+                                    <input type="text" id="personSearchInput" class="glass-input" placeholder="Search person stats...">
+                                </div>
+                                <div class="person-stats-list" id="personStatsList">
+                                </div>
                             </div>
                         </div>
                     </div>
-                </section>
 
-                <!-- Leaderboard & Statistics Section -->
-                <section id="leaderboard-section" class="content-section hidden">
-                    <div class="grid-2-col">
-                        <div class="card glass-panel">
-                            <h3><i class="fa-solid fa-trophy text-gold"></i> Talk Time Leaderboard</h3>
-                            <ul class="leaderboard-list" id="leaderboardList">
-                                <!-- Leaderboard items injected via JS -->
-                            </ul>
-                        </div>
-                        
-                        <div class="card glass-panel">
-                            <h3><i class="fa-solid fa-users text-primary"></i> Person Statistics</h3>
-                            <div class="search-box mb-3">
-                                <i class="fa-solid fa-search"></i>
-                                <input type="text" id="personSearchInput" class="glass-input" placeholder="Search person stats...">
+                    <div id="analysis-internet" class="analysis-tab-content hidden">
+                        <div class="card glass-panel chart-container full-width">
+                            <h3>Internet Usage Analysis (MB)</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="internetAnalysisChart"></canvas>
                             </div>
-                            <div class="person-stats-list" id="personStatsList">
-                                <!-- Person stats injected via JS -->
+                        </div>
+                    </div>
+
+                    <div id="analysis-sms" class="analysis-tab-content hidden">
+                        <div class="card glass-panel chart-container full-width">
+                            <h3>SMS Activity Analysis</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="smsAnalysisChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -363,11 +436,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
     
-    <script src="storage.js?v=3"></script>
-    <script src="jio-parser.js?v=4"></script>
-    <script src="dashboard.js?v=3"></script>
-    <script src="charts.js?v=3"></script>
-    <script src="export.js?v=3"></script>
-    <script src="script.js?v=3"></script>
+    <script src="storage.js?v=5"></script>
+    <script src="jio-parser.js?v=5"></script>
+    <script src="dashboard.js?v=5"></script>
+    <script src="charts.js?v=5"></script>
+    <script src="export.js?v=5"></script>
+    <script src="script.js?v=5"></script>
 </body>
 </html>

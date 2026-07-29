@@ -5,7 +5,11 @@ class ChartManager {
             mainPie: null,
             durationBar: null,
             callsDoughnut: null,
-            topTalkers: null
+            topTalkers: null,
+            internetLine: null,
+            smsLine: null,
+            internetAnalysis: null,
+            smsAnalysis: null
         };
         
         // Setup default Chart.js configuration for our theme
@@ -319,6 +323,131 @@ class ChartManager {
         this.renderDurationBarChart(personStats);
         this.renderCallsDoughnutChart(personStats);
         this.renderTopTalkersChart(personStats);
+    }
+
+    renderInternetLineChart(data) {
+        const ctx = document.getElementById('internetLineChart');
+        if (!ctx || typeof Chart === 'undefined') return;
+        if (this.charts.internetLine) this.charts.internetLine.destroy();
+
+        const dateMap = {};
+        const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+        sortedData.forEach(log => {
+            if (!dateMap[log.date]) dateMap[log.date] = 0;
+            dateMap[log.date] += log.dataMB;
+        });
+
+        const labels = Object.keys(dateMap).map(date => new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+        const mbData = Object.values(dateMap);
+        const chartType = labels.length <= 1 ? 'bar' : 'line';
+
+        this.charts.internetLine = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Data Usage (MB)',
+                    data: mbData,
+                    borderColor: this.colors.primary,
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Also render the analysis chart which is a duplicate for now (can be changed later)
+        const ctxAnalysis = document.getElementById('internetAnalysisChart');
+        if (ctxAnalysis) {
+            if (this.charts.internetAnalysis) this.charts.internetAnalysis.destroy();
+            this.charts.internetAnalysis = new Chart(ctxAnalysis, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Data Usage (MB)',
+                        data: mbData,
+                        backgroundColor: this.colors.primary,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    renderSmsLineChart(data) {
+        const ctx = document.getElementById('smsLineChart');
+        if (!ctx || typeof Chart === 'undefined') return;
+        if (this.charts.smsLine) this.charts.smsLine.destroy();
+
+        const dateMap = {};
+        const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
+        sortedData.forEach(log => {
+            if (!dateMap[log.date]) dateMap[log.date] = 0;
+            dateMap[log.date] += log.count;
+        });
+
+        const labels = Object.keys(dateMap).map(date => new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+        const countData = Object.values(dateMap);
+        const chartType = labels.length <= 1 ? 'bar' : 'line';
+
+        this.charts.smsLine = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'SMS Count',
+                    data: countData,
+                    borderColor: this.colors.purple,
+                    backgroundColor: 'rgba(217, 70, 239, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        // Analysis chart
+        const ctxAnalysis = document.getElementById('smsAnalysisChart');
+        if (ctxAnalysis) {
+            if (this.charts.smsAnalysis) this.charts.smsAnalysis.destroy();
+            this.charts.smsAnalysis = new Chart(ctxAnalysis, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'SMS Sent',
+                        data: countData,
+                        backgroundColor: this.colors.purple,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
     }
 }
 

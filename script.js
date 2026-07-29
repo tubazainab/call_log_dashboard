@@ -57,8 +57,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportExcelBtn = document.getElementById('exportExcel');
     const printDashBtn = document.getElementById('printDash');
     
-    const importJioBtn = document.getElementById('importJioBtn');
-    const jioPdfInput = document.getElementById('jioPdfInput');
+    const importCallsBtn = document.getElementById('importCallsBtn');
+    const callsPdfInput = document.getElementById('callsPdfInput');
+    const importInternetBtn = document.getElementById('importInternetBtn');
+    const internetPdfInput = document.getElementById('internetPdfInput');
+    const importSmsBtn = document.getElementById('importSmsBtn');
+    const smsPdfInput = document.getElementById('smsPdfInput');
     const downloadImageBtn = document.getElementById('downloadImageBtn');
     
     // Toast
@@ -223,54 +227,85 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast(e.detail.message, e.detail.type);
         });
 
-        // Jio PDF Import
-        if (importJioBtn && jioPdfInput) {
-            importJioBtn.addEventListener('click', () => {
-                jioPdfInput.click();
-            });
-
-            jioPdfInput.addEventListener('change', async (e) => {
+        // Call Logs Import
+        if (importCallsBtn && callsPdfInput) {
+            importCallsBtn.addEventListener('click', () => callsPdfInput.click());
+            callsPdfInput.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-
                 showLoading();
                 try {
                     const result = await jioParser.parsePDF(file);
                     const calls = result.calls || [];
-                    const internet = result.internet || [];
-                    const sms = result.sms || [];
-                    
-                    if (calls.length === 0 && internet.length === 0 && sms.length === 0) {
-                        showToast('No data found in this PDF.', 'error');
+                    if (calls.length === 0) {
+                        showToast('No call logs found in this PDF.', 'error');
                     } else {
-                        // Add calls to storage
                         calls.forEach(call => {
-                            // Check if contact name already exists for this number in previous logs
                             const existingContact = currentLogs.find(l => l.mobileNumber === call.mobileNumber && l.personName !== l.mobileNumber);
-                            if (existingContact) {
-                                call.personName = existingContact.personName;
-                            }
+                            if (existingContact) call.personName = existingContact.personName;
                             storage.addCallLog(call);
                         });
-                        
-                        // Replace Internet and SMS logs with the latest bill
-                        storage.setInternetLogs(internet);
-                        storage.setSmsLogs(sms);
-                        
                         currentLogs = storage.getCallLogs();
-                        currentInternet = storage.getInternetLogs();
-                        currentSms = storage.getSmsLogs();
-                        
                         updateAllViews();
-                        showToast(`Imported ${calls.length} calls, ${internet.length} data logs, ${sms.length} SMS logs!`);
-                        document.querySelector('[data-target="dashboard-section"]').click();
+                        showToast(`Successfully imported ${calls.length} call logs!`);
                     }
-                } catch (error) {
+                } catch (err) {
                     showToast('Failed to parse PDF', 'error');
-                } finally {
-                    hideLoading();
-                    jioPdfInput.value = ''; // Reset input
                 }
+                hideLoading();
+                e.target.value = '';
+            });
+        }
+
+        // Internet Logs Import
+        if (importInternetBtn && internetPdfInput) {
+            importInternetBtn.addEventListener('click', () => internetPdfInput.click());
+            internetPdfInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                showLoading();
+                try {
+                    const result = await jioParser.parsePDF(file);
+                    const internet = result.internet || [];
+                    if (internet.length === 0) {
+                        showToast('No internet logs found in this PDF.', 'error');
+                    } else {
+                        storage.setInternetLogs(internet);
+                        currentInternet = storage.getInternetLogs();
+                        updateAllViews();
+                        showToast(`Successfully imported internet data!`);
+                    }
+                } catch (err) {
+                    showToast('Failed to parse PDF', 'error');
+                }
+                hideLoading();
+                e.target.value = '';
+            });
+        }
+
+        // SMS Logs Import
+        if (importSmsBtn && smsPdfInput) {
+            importSmsBtn.addEventListener('click', () => smsPdfInput.click());
+            smsPdfInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                showLoading();
+                try {
+                    const result = await jioParser.parsePDF(file);
+                    const sms = result.sms || [];
+                    if (sms.length === 0) {
+                        showToast('No SMS logs found in this PDF.', 'error');
+                    } else {
+                        storage.setSmsLogs(sms);
+                        currentSms = storage.getSmsLogs();
+                        updateAllViews();
+                        showToast(`Successfully imported SMS logs!`);
+                    }
+                } catch (err) {
+                    showToast('Failed to parse PDF', 'error');
+                }
+                hideLoading();
+                e.target.value = '';
             });
         }
 
@@ -635,6 +670,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const personStats = dashboardManager.updateAll(logsToProcess, internetToProcess, smsToProcess);
         chartManager.updateAllCharts(logsToProcess, personStats);
+        
+        if (chartManager.renderInternetLineChart) {
+            chartManager.renderInternetLineChart(internetToProcess);
+        }
+        if (chartManager.renderSmsLineChart) {
+            chartManager.renderSmsLineChart(smsToProcess);
+        }
     }
 
     function updateAllViews() {
@@ -734,3 +776,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+
+window.switchAnalysisTab = function(tabId) {
+    document.querySelectorAll('.analytics-tabs .btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === tabId) btn.classList.add('active');
+    });
+    document.querySelectorAll('.analysis-tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    document.getElementById(tabId).classList.remove('hidden');
+};
