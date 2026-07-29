@@ -65,10 +65,6 @@ class DashboardManager {
         let totalSms = 0;
         smsData.forEach(s => totalSms += s.count);
         document.getElementById('statTotalSMS').textContent = totalSms;
-
-        document.getElementById('statIncoming').textContent = stats.incoming;
-        document.getElementById('statOutgoing').textContent = stats.outgoing;
-        document.getElementById('statMissed').textContent = stats.missed;
     }
 
     calculatePersonStats(logs) {

@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentInternet = [];
     let currentSms = [];
     let currentTheme = localStorage.getItem('theme') || 'dark';
+    let toastTimeout;
     
     // --- DOM Elements ---
     // Navigation
@@ -650,9 +651,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideLoading() {
         document.getElementById('loadingOverlay').classList.add('hidden');
-    }
-
-    let toastTimeout;
     function showToast(message, type = 'success') {
         clearTimeout(toastTimeout);
         
