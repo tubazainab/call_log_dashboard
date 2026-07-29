@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Log Dashboard</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%238b5cf6' /><path d='M68,58 C63,58 58,56 54,53 C52,52 50,53 48,55 L43,50 C45,48 46,46 45,44 C42,40 40,35 40,30 C40,26 37,23 33,23 C29,23 26,26 26,30 C26,46 40,63 58,70 C60,71 62,71 64,71 C68,71 71,68 71,64 C71,60 68,58 68,58 Z' fill='white' transform='translate(5,5)'/></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-phone-volume logo-icon"></i>
+                <h2 style="font-size: 1.1rem; text-wrap: wrap;">Call Log Dashboard</h2>
+                <button id="closeSidebarBtn" class="mobile-only btn-icon"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-target="dashboard-section">
+                    <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
+                </a>
+                <a href="#add-call" class="nav-item" data-target="add-call-section">
+                    <i class="fa-solid fa-phone-plus"></i> <span>Add Call</span>
+                </a>
+                <a href="#call-history" class="nav-item" data-target="call-history-section">
+                    <i class="fa-solid fa-list-ul"></i> <span>Call History</span>
+                </a>
+                <a href="#analytics" class="nav-item" data-target="analytics-section">
+                    <i class="fa-solid fa-chart-line"></i> <span>Analytics</span>
+                </a>
+                <a href="#leaderboard" class="nav-item" data-target="leaderboard-section">
+                    <i class="fa-solid fa-trophy"></i> <span>Leaderboard</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header glass-panel">
+                <div class="header-left">
+                    <button id="toggleSidebarBtn" class="btn-icon"><i class="fa-solid fa-bars"></i></button>
+                    <h1 id="page-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <button class="btn btn-secondary" id="downloadImageBtn">
+                        <i class="fa-solid fa-camera"></i> Download Screenshot
+                    </button>
+                    <button class="btn btn-primary" id="importJioBtn">
+                        <i class="fa-solid fa-file-pdf"></i> Import Bill
+                    </button>
+                    <input type="file" id="jioPdfInput" accept="application/pdf" class="hidden">
+                    
+                    <div class="export-dropdown">
+                        <button class="btn btn-secondary" id="exportBtn">
+                            <i class="fa-solid fa-download"></i> Export <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-content" id="exportDropdownContent">
+                            <a href="#" id="exportCSV"><i class="fa-solid fa-file-csv"></i> CSV</a>
+                            <a href="#" id="exportExcel"><i class="fa-solid fa-file-excel"></i> Excel</a>
+                            <a href="#" id="printDash"><i class="fa-solid fa-print"></i> Print</a>
+                        </div>
+                    </div>
+                    <button id="themeToggle" class="btn-icon theme-toggle" aria-label="Toggle Theme">
+                        <i class="fa-solid fa-sun"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="loading-overlay hidden">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Content Sections -->
+            <div class="content-wrapper">
+                <!-- Dashboard Section -->
+                <section id="dashboard-section" class="content-section active">
+                    <!-- Filters -->
+                    <div class="filter-bar glass-panel">
+                        <div class="filter-group">
+                            <label>Time Range:</label>
+                            <select id="dashTimeFilter" class="glass-input">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="summary-cards">
+                        <div class="card glass-panel stat-card">
+                            <div class="stat-icon calls"><i class="fa-solid fa-phone"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Calls</h3>
+                                <p id="statTotalCalls">0</p>
+                            </div>
+                        </div>
+                        <div class="card glass-panel stat-card">
+                            <div class="stat-icon duration"><i class="fa-solid fa-clock"></i></div>
+                            <div class="stat-info">
+                                <h3>Total Duration</h3>
+                                <p id="statTotalDuration">0h 0m</p>
+                            </div>
+                        </div>
+                        <div class="card glass-panel stat-card">
+                            <div class="stat-icon avg"><i class="fa-solid fa-stopwatch"></i></div>
+                            <div class="stat-info">
+                                <h3>Avg Duration</h3>
+                                <p id="statAvgDuration">0m</p>
+                            </div>
+                        </div>
+                        <div class="card glass-panel stat-card">
+                            <div class="stat-icon long"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
+                            <div class="stat-info">
+                                <h3>Longest Call</h3>
+                                <p id="statLongestCall">0s</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-cards sub-stats mt-4">
+                        <div class="card glass-panel stat-card small">
+                            <div class="stat-info">
+                                <h5><i class="fa-solid fa-arrow-down incoming-color"></i> Incoming</h5>
+                                <h4 id="statIncoming">0</h4>
+                            </div>
+                        </div>
+                        <div class="card glass-panel stat-card small">
+                            <div class="stat-info">
+                                <h5><i class="fa-solid fa-arrow-up outgoing-color"></i> Outgoing</h5>
+                                <h4 id="statOutgoing">0</h4>
+                            </div>
+                        </div>
+                        <div class="card glass-panel stat-card small">
+                            <div class="stat-info">
+                                <h5><i class="fa-solid fa-phone-slash missed-color"></i> Missed</h5>
+                                <h4 id="statMissed">0</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Preview -->
+                    <div class="charts-grid mt-4">
+                        <div class="card glass-panel chart-container">
+                            <h3>Calls Over Time</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="mainLineChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card glass-panel chart-container">
+                            <h3>Call Types</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="mainPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Add Call Form Section -->
+                <section id="add-call-section" class="content-section hidden">
+                    <div class="card glass-panel form-card mx-auto">
+                        <h2><i class="fa-solid fa-phone-plus text-primary"></i> New Call Log</h2>
+                        <form id="callLogForm">
+                            <input type="hidden" id="editCallId">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="personName">Contact Name (Optional)</label>
+                                    <input type="text" id="personName" class="glass-input" placeholder="e.g. John Doe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="mobileNumber">Mobile Number *</label>
+                                    <input type="tel" id="mobileNumber" class="glass-input" required placeholder="e.g. 917028536741">
+                                </div>
+                                <div class="form-group">
+                                    <label for="callDate">Date *</label>
+                                    <input type="date" id="callDate" class="glass-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="callType">Call Type *</label>
+                                    <select id="callType" class="glass-input" required>
+                                        <option value="incoming">Incoming</option>
+                                        <option value="outgoing">Outgoing</option>
+                                        <option value="missed">Missed</option>
+                                    </select>
+                                </div>
+                                <div class="form-group time-inputs">
+                                    <div class="time-field">
+                                        <label for="startTime">Start Time</label>
+                                        <input type="time" id="startTime" class="glass-input">
+                                    </div>
+                                    <div class="time-field">
+                                        <label for="endTime">End Time</label>
+                                        <input type="time" id="endTime" class="glass-input">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="duration">Duration (Seconds)</label>
+                                    <input type="number" id="duration" class="glass-input" placeholder="Auto-calculated or enter seconds">
+                                    <small class="hint">Calculated automatically if times provided.</small>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="notes">Notes</label>
+                                    <textarea id="notes" rows="3" class="glass-input" placeholder="Any details about the call..."></textarea>
+                                </div>
+                            </div>
+                            <div class="form-actions mt-4">
+                                <button type="button" class="btn btn-secondary" id="resetFormBtn">Clear</button>
+                                <button type="submit" class="btn btn-primary" id="saveCallBtn">
+                                    <i class="fa-solid fa-save"></i> Save Call Log
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Call History Table Section -->
+                <section id="call-history-section" class="content-section hidden">
+                    <div class="card glass-panel full-height-card">
+                        <div class="table-header-actions">
+                            <div class="search-box">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" id="searchInput" class="glass-input" placeholder="Search name or number...">
+                            </div>
+                            <div class="table-filters">
+                                <select id="filterType" class="glass-input">
+                                    <option value="all">All Types</option>
+                                    <option value="incoming">Incoming</option>
+                                    <option value="outgoing">Outgoing</option>
+                                    <option value="missed">Missed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="call-table" id="callTable">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="date" class="sortable">Date <i class="fa-solid fa-sort"></i></th>
+                                        <th data-sort="name" class="sortable">Name <i class="fa-solid fa-sort"></i></th>
+                                        <th>Number</th>
+                                        <th>Type</th>
+                                        <th>Time</th>
+                                        <th data-sort="duration" class="sortable">Duration <i class="fa-solid fa-sort"></i></th>
+                                        <th>Notes</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="callTableBody">
+                                    <!-- Table rows injected via JS -->
+                                </tbody>
+                            </table>
+                            <div id="emptyTableState" class="empty-state hidden">
+                                <i class="fa-solid fa-folder-open text-muted"></i>
+                                <p>No call logs found</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Analytics Section -->
+                <section id="analytics-section" class="content-section hidden">
+                    <div class="charts-grid-large">
+                        <div class="card glass-panel chart-container">
+                            <h3>Total Call Duration by Person</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="durationBarChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card glass-panel chart-container">
+                            <h3>Total Calls by Person</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="callsDoughnutChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card glass-panel chart-container full-width">
+                            <h3>Top 10 People by Talk Time</h3>
+                            <div class="canvas-wrapper">
+                                <canvas id="topTalkersChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Leaderboard & Statistics Section -->
+                <section id="leaderboard-section" class="content-section hidden">
+                    <div class="grid-2-col">
+                        <div class="card glass-panel">
+                            <h3><i class="fa-solid fa-trophy text-gold"></i> Talk Time Leaderboard</h3>
+                            <ul class="leaderboard-list" id="leaderboardList">
+                                <!-- Leaderboard items injected via JS -->
+                            </ul>
+                        </div>
+                        
+                        <div class="card glass-panel">
+                            <h3><i class="fa-solid fa-users text-primary"></i> Person Statistics</h3>
+                            <div class="search-box mb-3">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" id="personSearchInput" class="glass-input" placeholder="Search person stats...">
+                            </div>
+                            <div class="person-stats-list" id="personStatsList">
+                                <!-- Person stats injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="toast hidden">
+        <i class="fa-solid fa-circle-check toast-icon"></i>
+        <span class="toast-message">Action successful!</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
+    
+    <script src="storage.js"></script>
+    <script src="jio-parser.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="charts.js"></script>
+    <script src="export.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
