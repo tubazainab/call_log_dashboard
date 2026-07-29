@@ -731,52 +731,67 @@ a {
         grid-template-columns: 1fr;
     }
     
-    .app-container {
-        flex-direction: column;
-    }
-    
     .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        top: auto;
         width: 100%;
         height: auto;
         border-right: none;
-        border-bottom: 1px solid var(--glass-border);
-        padding: 1rem;
-        position: sticky;
-        top: 0;
-        z-index: 100;
+        border-top: 1px solid var(--glass-border);
+        border-bottom: none;
+        padding: 0;
+        z-index: 1000;
+        flex-direction: row;
         background: var(--glass-bg);
         backdrop-filter: blur(12px);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
     }
     
-    .brand {
-        margin-bottom: 0.5rem;
-        text-align: center;
+    .sidebar-header {
+        display: none; /* Hide logo/brand on mobile since it is in top-header */
     }
     
     .sidebar-nav {
         display: flex;
-        overflow-x: auto;
-        padding: 0;
-        gap: 0.5rem;
         flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
+        padding: 0;
+        gap: 0;
     }
     
     .nav-item {
-        margin-bottom: 0;
-        margin-right: 0;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 10px 4px;
+        gap: 4px;
+        flex: 1;
+        font-size: 0.7rem;
+        border-radius: 0;
         white-space: nowrap;
-        padding: 0.5rem 1rem;
-        flex: 0 0 auto;
+    }
+    
+    .nav-item i {
+        font-size: 1.2rem;
+        width: auto;
     }
     
     /* Reset hover transform for mobile */
     .nav-item:hover, .nav-item.active {
         transform: none;
+        background: transparent;
+        color: var(--primary-color);
+        border-top: 2px solid var(--primary-color);
     }
 
     .main-content {
         padding: 1rem;
         margin-left: 0;
+        padding-bottom: 80px; /* Space for bottom nav */
     }
 
     .header-content {
