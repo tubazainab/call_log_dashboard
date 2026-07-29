@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- State ---
     let currentLogs = [];
+    let currentInternet = [];
+    let currentSms = [];
     let currentTheme = localStorage.getItem('theme') || 'dark';
     
     // --- DOM Elements ---
@@ -31,8 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyTableState = document.getElementById('emptyTableState');
     const callTable = document.getElementById('callTable');
     
+    // Internet & SMS Tables
+    const internetTableBody = document.getElementById('internetTableBody');
+    const emptyInternetState = document.getElementById('emptyInternetState');
+    const smsTableBody = document.getElementById('smsTableBody');
+    const emptySmsState = document.getElementById('emptySmsState');
+    
     // Dashboard Filter
     const dashTimeFilter = document.getElementById('dashTimeFilter');
+    const customDateGroup = document.getElementById('customDateGroup');
+    const customStartDate = document.getElementById('customStartDate');
+    const customEndDate = document.getElementById('customEndDate');
+    const applyCustomDateBtn = document.getElementById('applyCustomDateBtn');
     
     // Leaderboard/Stats Search
     const personSearchInput = document.getElementById('personSearchInput');
@@ -61,6 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Load Data
         currentLogs = storage.getCallLogs();
+        currentInternet = storage.getInternetLogs();
+        currentSms = storage.getSmsLogs();
         
         // Generate mock data if empty (for demonstration)
         // if (currentLogs.length === 0) {
@@ -155,8 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Dashboard Filters
         dashTimeFilter.addEventListener('change', () => {
-            updateDashboardView();
+            if (dashTimeFilter.value === 'custom') {
+                customDateGroup.classList.remove('hidden');
+            } else {
+                customDateGroup.classList.add('hidden');
+                updateDashboardView();
+            }
         });
+        
+        if (applyCustomDateBtn) {
+            applyCustomDateBtn.addEventListener('click', () => {
+                updateDashboardView();
+            });
+        }
 
         // Person Stats Search
         personSearchInput.addEventListener('input', (e) => {
@@ -209,10 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 showLoading();
                 try {
-                    const calls = await jioParser.parsePDF(file);
+                    const result = await jioParser.parsePDF(file);
+                    const calls = result.calls || [];
+                    const internet = result.internet || [];
+                    const sms = result.sms || [];
                     
-                    if (calls.length === 0) {
-                        showToast('No calls found in this PDF.', 'error');
+                    if (calls.length === 0 && internet.length === 0 && sms.length === 0) {
+                        showToast('No data found in this PDF.', 'error');
                     } else {
                         // Add calls to storage
                         calls.forEach(call => {
@@ -224,9 +252,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             storage.addCallLog(call);
                         });
                         
+                        // Replace Internet and SMS logs with the latest bill
+                        storage.setInternetLogs(internet);
+                        storage.setSmsLogs(sms);
+                        
                         currentLogs = storage.getCallLogs();
+                        currentInternet = storage.getInternetLogs();
+                        currentSms = storage.getSmsLogs();
+                        
                         updateAllViews();
-                        showToast(`Successfully imported ${calls.length} calls!`);
+                        showToast(`Imported ${calls.length} calls, ${internet.length} data logs, ${sms.length} SMS logs!`);
                         document.querySelector('[data-target="dashboard-section"]').click();
                     }
                 } catch (error) {
@@ -508,46 +543,103 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function getDashboardFilteredLogs() {
+    function renderInternetTable() {
+        internetTableBody.innerHTML = '';
+        if (currentInternet.length === 0) {
+            document.getElementById('internetTable').classList.add('hidden');
+            emptyInternetState.classList.remove('hidden');
+            return;
+        }
+        
+        document.getElementById('internetTable').classList.remove('hidden');
+        emptyInternetState.classList.add('hidden');
+
+        currentInternet.forEach(log => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${log.date}</td>
+                <td class="text-muted">${log.startTime}</td>
+                <td class="text-muted">${log.endTime}</td>
+                <td class="font-medium text-primary">${log.dataMB.toFixed(2)} MB</td>
+            `;
+            internetTableBody.appendChild(tr);
+        });
+    }
+
+    function renderSmsTable() {
+        smsTableBody.innerHTML = '';
+        if (currentSms.length === 0) {
+            document.getElementById('smsTable').classList.add('hidden');
+            emptySmsState.classList.remove('hidden');
+            return;
+        }
+        
+        document.getElementById('smsTable').classList.remove('hidden');
+        emptySmsState.classList.add('hidden');
+
+        currentSms.forEach(log => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${log.date}</td>
+                <td class="text-muted">${log.time}</td>
+                <td class="font-medium">${log.mobileNumber}</td>
+                <td class="text-primary">${log.count}</td>
+            `;
+            smsTableBody.appendChild(tr);
+        });
+    }
+
+    function filterByDate(dataArray) {
         const timeFilter = dashTimeFilter.value;
         const now = new Date();
         const today = now.toISOString().split('T')[0];
         
-        let filtered = [...currentLogs];
+        let filtered = [...dataArray];
 
         if (timeFilter === 'today') {
-            filtered = filtered.filter(log => log.date === today);
+            filtered = filtered.filter(item => item.date === today);
         } 
         else if (timeFilter === 'yesterday') {
             const yesterday = new Date(now);
             yesterday.setDate(now.getDate() - 1);
             const yesterdayStr = yesterday.toISOString().split('T')[0];
-            filtered = filtered.filter(log => log.date === yesterdayStr);
+            filtered = filtered.filter(item => item.date === yesterdayStr);
         }
         else if (timeFilter === 'week') {
             const lastWeek = new Date(now);
             lastWeek.setDate(now.getDate() - 7);
-            filtered = filtered.filter(log => new Date(log.date) >= lastWeek);
+            filtered = filtered.filter(item => new Date(item.date) >= lastWeek);
         }
         else if (timeFilter === 'month') {
             const lastMonth = new Date(now);
             lastMonth.setDate(now.getDate() - 30);
-            filtered = filtered.filter(log => new Date(log.date) >= lastMonth);
+            filtered = filtered.filter(item => new Date(item.date) >= lastMonth);
         }
-
+        else if (timeFilter === 'custom') {
+            const start = customStartDate.value;
+            const end = customEndDate.value;
+            if (start && end) {
+                filtered = filtered.filter(item => item.date >= start && item.date <= end);
+            }
+        }
         return filtered;
     }
 
+    function getDashboardFilteredLogs() { return filterByDate(currentLogs); }
+
     function updateDashboardView() {
         const logsToProcess = getDashboardFilteredLogs();
-        const personStats = dashboardManager.updateAll(logsToProcess);
+        const internetToProcess = filterByDate(currentInternet);
+        const smsToProcess = filterByDate(currentSms);
         
-        // Use chartManager to update charts with new filtered data
+        const personStats = dashboardManager.updateAll(logsToProcess, internetToProcess, smsToProcess);
         chartManager.updateAllCharts(logsToProcess, personStats);
     }
 
     function updateAllViews() {
         renderTable();
+        renderInternetTable();
+        renderSmsTable();
         updateDashboardView();
     }
 

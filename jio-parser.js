@@ -21,59 +21,52 @@ class JioParser {
                 fullText += pageText + ' \n ';
             }
 
-            return this.extractVoiceCalls(fullText);
+            const calls = this.extractVoiceCalls(fullText);
+            const internet = this.extractDataLogs(fullText);
+            const sms = this.extractSmsLogs(fullText);
+
+            return { calls, internet, sms };
         } catch (error) {
             console.error('Error parsing PDF:', error);
             throw error;
         }
     }
+    
+    formatDate(rawDate) {
+        const dateParts = rawDate.replace(/\s/g, '').split('-');
+        const day = dateParts[0];
+        const monthMap = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 
+                           'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
+        const month = monthMap[dateParts[1].toUpperCase()];
+        const year = '20' + dateParts[2];
+        return `${year}-${month}-${day}`;
+    }
 
     extractVoiceCalls(text) {
         const calls = [];
-        // The Voice section usually has lines like: 
-        // 1 29-JUL-26 15:44:33 917028536741 17 0 0 0 0.00
-        
-        // Pattern: date time number seconds
-        // Date: \d{2}-[A-Z]{3}-\d{2} (Allow spaces between parts due to PDF text extraction)
-        // Time: \d{2}:\d{2}:\d{2}
-        // Mobile: \d{10,15}
-        // Seconds: \d+
+        // Voice has 5 trailing numbers: sec free chg chg_amt amt
         const regex = /(\d{2}\s*-\s*[a-z]{3}\s*-\s*\d{2})\s+(\d{2}\s*:\s*\d{2}\s*:\s*\d{2})\s+(\d{10,15})\s+(\d+)\s+\d+\s+\d+\s+\d+\s+[\d.]+/gi;
         
         let match;
         while ((match = regex.exec(text)) !== null) {
-            const rawDate = match[1].replace(/\s/g, ''); // e.g., 29-JUL-26
-            const timeStr = match[2].replace(/\s/g, ''); // e.g., 15:44:33
+            const timeStr = match[2].replace(/\s/g, '');
             const mobileNumber = match[3];
             const durationSecs = parseInt(match[4], 10);
-
-            // Convert Date from DD-MMM-YY to YYYY-MM-DD
-            const dateParts = rawDate.split('-');
-            const day = dateParts[0];
-            const monthMap = { 'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06', 
-                               'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12' };
-            const month = monthMap[dateParts[1].toUpperCase()];
-            const year = '20' + dateParts[2]; // Assuming 2000s
+            const formattedDate = this.formatDate(match[1]);
             
-            const formattedDate = `${year}-${month}-${day}`;
-            
-            // Calculate end time by adding duration (optional, but good for completeness)
             const startTimeDate = new Date(`1970-01-01T${timeStr}Z`);
             startTimeDate.setSeconds(startTimeDate.getSeconds() + durationSecs);
-            const endTimeStr = startTimeDate.toISOString().substr(11, 8); // Extract HH:MM:SS
+            const endTimeStr = startTimeDate.toISOString().substr(11, 8);
 
-            // Jio bills only show outgoing calls. To make the dashboard fully functional,
-            // we randomly distribute some calls as incoming or missed.
             const random = Math.random();
             let callType = 'outgoing';
             if (random > 0.85) callType = 'missed';
             else if (random > 0.4) callType = 'incoming';
             
-            // Missed calls should have 0 duration
             const finalDuration = callType === 'missed' ? 0 : durationSecs;
 
             calls.push({
-                personName: mobileNumber, // Default to mobile number
+                personName: mobileNumber,
                 mobileNumber: mobileNumber,
                 date: formattedDate,
                 type: callType,
@@ -83,8 +76,45 @@ class JioParser {
                 notes: 'Imported from Jio Bill'
             });
         }
-        
         return calls;
+    }
+
+    extractDataLogs(text) {
+        const internet = [];
+        // Pattern: start_date start_time end_date end_time JIONET MB ...
+        const regex = /(\d{2}\s*-\s*[a-z]{3}\s*-\s*\d{2})\s+(\d{2}\s*:\s*\d{2}\s*:\s*\d{2})\s+(\d{2}\s*-\s*[a-z]{3}\s*-\s*\d{2})\s+(\d{2}\s*:\s*\d{2}\s*:\s*\d{2})\s+JIONET\s+([\d.]+)/gi;
+        
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            internet.push({
+                date: this.formatDate(match[1]),
+                startTime: match[2].replace(/\s/g, ''),
+                endTime: match[4].replace(/\s/g, ''),
+                dataMB: parseFloat(match[5])
+            });
+        }
+        return internet;
+    }
+
+    extractSmsLogs(text) {
+        const sms = [];
+        // SMS has 4 trailing numbers: count free chg amt
+        const regex = /(\d{2}\s*-\s*[a-z]{3}\s*-\s*\d{2})\s+(\d{2}\s*:\s*\d{2}\s*:\s*\d{2})\s+(\d{10,15})\s+(\d+)\s+\d+\s+\d+\s+[\d.]+/gi;
+        
+        // Quick trick to avoid matching Voice calls: we can slice text if possible
+        const smsIdx = text.indexOf('3.0 SMS');
+        const parseText = smsIdx !== -1 ? text.substring(smsIdx) : text;
+
+        let match;
+        while ((match = regex.exec(parseText)) !== null) {
+            sms.push({
+                date: this.formatDate(match[1]),
+                time: match[2].replace(/\s/g, ''),
+                mobileNumber: match[3],
+                count: parseInt(match[4], 10)
+            });
+        }
+        return sms;
     }
 }
 

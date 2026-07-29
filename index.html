@@ -32,17 +32,17 @@
                 <a href="#dashboard" class="nav-item active" data-target="dashboard-section">
                     <i class="fa-solid fa-chart-pie"></i> <span>Dashboard</span>
                 </a>
-                <a href="#add-call" class="nav-item" data-target="add-call-section">
-                    <i class="fa-solid fa-phone-plus"></i> <span>Add Call</span>
+                <a href="#internet" class="nav-item" data-target="internet-section">
+                    <i class="fa-solid fa-wifi"></i> <span>Internet</span>
+                </a>
+                <a href="#sms" class="nav-item" data-target="sms-section">
+                    <i class="fa-solid fa-comment-sms"></i> <span>SMS</span>
                 </a>
                 <a href="#call-history" class="nav-item" data-target="call-history-section">
-                    <i class="fa-solid fa-list-ul"></i> <span>Call History</span>
+                    <i class="fa-solid fa-phone"></i> <span>Calls</span>
                 </a>
                 <a href="#analytics" class="nav-item" data-target="analytics-section">
                     <i class="fa-solid fa-chart-line"></i> <span>Analytics</span>
-                </a>
-                <a href="#leaderboard" class="nav-item" data-target="leaderboard-section">
-                    <i class="fa-solid fa-trophy"></i> <span>Leaderboard</span>
                 </a>
             </nav>
         </aside>
@@ -99,7 +99,14 @@
                                 <option value="yesterday">Yesterday</option>
                                 <option value="week">This Week</option>
                                 <option value="month">This Month</option>
+                                <option value="custom">Custom Range</option>
                             </select>
+                        </div>
+                        <div class="filter-group custom-date-group hidden" id="customDateGroup">
+                            <input type="date" id="customStartDate" class="glass-input">
+                            <span style="color:var(--text-secondary)">to</span>
+                            <input type="date" id="customEndDate" class="glass-input">
+                            <button id="applyCustomDateBtn" class="btn btn-primary" style="padding:0.4rem 0.8rem;font-size:0.85rem;">Apply</button>
                         </div>
                     </div>
 
@@ -113,49 +120,20 @@
                             </div>
                         </div>
                         <div class="card glass-panel stat-card">
-                            <div class="stat-icon duration"><i class="fa-solid fa-clock"></i></div>
+                            <div class="stat-icon duration" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><i class="fa-solid fa-wifi"></i></div>
                             <div class="stat-info">
-                                <h3>Total Duration</h3>
-                                <p id="statTotalDuration">0h 0m</p>
+                                <h3>Internet Usage</h3>
+                                <p id="statTotalInternet">0.00 GB</p>
                             </div>
                         </div>
                         <div class="card glass-panel stat-card">
-                            <div class="stat-icon avg"><i class="fa-solid fa-stopwatch"></i></div>
+                            <div class="stat-icon avg" style="background: rgba(236, 72, 153, 0.1); color: #ec4899;"><i class="fa-solid fa-comment-sms"></i></div>
                             <div class="stat-info">
-                                <h3>Avg Duration</h3>
-                                <p id="statAvgDuration">0m</p>
-                            </div>
-                        </div>
-                        <div class="card glass-panel stat-card">
-                            <div class="stat-icon long"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
-                            <div class="stat-info">
-                                <h3>Longest Call</h3>
-                                <p id="statLongestCall">0s</p>
+                                <h3>Total SMS</h3>
+                                <p id="statTotalSMS">0</p>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="summary-cards sub-stats mt-4">
-                        <div class="card glass-panel stat-card small">
-                            <div class="stat-info">
-                                <h5><i class="fa-solid fa-arrow-down incoming-color"></i> Incoming</h5>
-                                <h4 id="statIncoming">0</h4>
-                            </div>
-                        </div>
-                        <div class="card glass-panel stat-card small">
-                            <div class="stat-info">
-                                <h5><i class="fa-solid fa-arrow-up outgoing-color"></i> Outgoing</h5>
-                                <h4 id="statOutgoing">0</h4>
-                            </div>
-                        </div>
-                        <div class="card glass-panel stat-card small">
-                            <div class="stat-info">
-                                <h5><i class="fa-solid fa-phone-slash missed-color"></i> Missed</h5>
-                                <h4 id="statMissed">0</h4>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Charts Preview -->
                     <div class="charts-grid mt-4">
                         <div class="card glass-panel chart-container">
@@ -168,6 +146,56 @@
                             <h3>Call Types</h3>
                             <div class="canvas-wrapper">
                                 <canvas id="mainPieChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Internet Section -->
+                <section id="internet-section" class="content-section hidden">
+                    <div class="card glass-panel full-height-card">
+                        <h2><i class="fa-solid fa-wifi text-primary"></i> Internet Data Logs</h2>
+                        <div class="table-responsive mt-4">
+                            <table class="call-table" id="internetTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th>Data Used (MB)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="internetTableBody">
+                                </tbody>
+                            </table>
+                            <div id="emptyInternetState" class="empty-state hidden">
+                                <i class="fa-solid fa-folder-open text-muted"></i>
+                                <p>No internet logs found</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SMS Section -->
+                <section id="sms-section" class="content-section hidden">
+                    <div class="card glass-panel full-height-card">
+                        <h2><i class="fa-solid fa-comment-sms text-primary"></i> SMS Logs</h2>
+                        <div class="table-responsive mt-4">
+                            <table class="call-table" id="smsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Mobile Number</th>
+                                        <th>SMS Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="smsTableBody">
+                                </tbody>
+                            </table>
+                            <div id="emptySmsState" class="empty-state hidden">
+                                <i class="fa-solid fa-folder-open text-muted"></i>
+                                <p>No SMS logs found</p>
                             </div>
                         </div>
                     </div>

@@ -54,12 +54,18 @@ class DashboardManager {
         };
     }
 
-    updateDashboardSummary(stats) {
+    updateDashboardSummary(stats, internetData = [], smsData = []) {
         document.getElementById('statTotalCalls').textContent = stats.totalCalls;
-        document.getElementById('statTotalDuration').textContent = this.formatDuration(stats.totalDuration);
-        document.getElementById('statAvgDuration').textContent = this.formatDuration(stats.avgDuration);
-        document.getElementById('statLongestCall').textContent = this.formatDuration(stats.longestCall);
         
+        let totalMb = 0;
+        internetData.forEach(i => totalMb += i.dataMB);
+        const gb = (totalMb / 1024).toFixed(2);
+        document.getElementById('statTotalInternet').textContent = `${gb} GB`;
+        
+        let totalSms = 0;
+        smsData.forEach(s => totalSms += s.count);
+        document.getElementById('statTotalSMS').textContent = totalSms;
+
         document.getElementById('statIncoming').textContent = stats.incoming;
         document.getElementById('statOutgoing').textContent = stats.outgoing;
         document.getElementById('statMissed').textContent = stats.missed;
@@ -193,9 +199,9 @@ class DashboardManager {
         });
     }
 
-    updateAll(logs) {
-        const summaryStats = this.calculateSummaryStats(logs);
-        this.updateDashboardSummary(summaryStats);
+    updateAll(logs, internet = [], sms = []) {
+        const stats = this.calculateSummaryStats(logs);
+        this.updateDashboardSummary(stats, internet, sms);
         
         this.calculatePersonStats(logs);
         this.renderLeaderboard();
