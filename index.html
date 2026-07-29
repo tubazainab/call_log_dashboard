@@ -52,21 +52,21 @@
             <!-- Header -->
             <header class="top-header glass-panel">
                 <div class="header-left">
-                    <button id="toggleSidebarBtn" class="btn-icon"><i class="fa-solid fa-bars"></i></button>
+                    <button id="toggleSidebarBtn" class="btn-icon mobile-only"><i class="fa-solid fa-bars"></i></button>
                     <h1 id="page-title">Dashboard</h1>
                 </div>
                 <div class="header-right">
                     <button class="btn btn-secondary" id="downloadImageBtn">
-                        <i class="fa-solid fa-camera"></i> Download Screenshot
+                        <i class="fa-solid fa-camera"></i> <span class="btn-text">Screenshot</span>
                     </button>
                     <button class="btn btn-primary" id="importJioBtn">
-                        <i class="fa-solid fa-file-pdf"></i> Import Bill
+                        <i class="fa-solid fa-file-pdf"></i> <span class="btn-text">Import Bill</span>
                     </button>
                     <input type="file" id="jioPdfInput" accept="application/pdf" class="hidden">
                     
                     <div class="export-dropdown">
                         <button class="btn btn-secondary" id="exportBtn">
-                            <i class="fa-solid fa-download"></i> Export <i class="fa-solid fa-chevron-down"></i>
+                            <i class="fa-solid fa-download"></i> <span class="btn-text">Export</span> <i class="fa-solid fa-chevron-down"></i>
                         </button>
                         <div class="dropdown-content" id="exportDropdownContent">
                             <a href="#" id="exportCSV"><i class="fa-solid fa-file-csv"></i> CSV</a>
