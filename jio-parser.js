@@ -98,11 +98,11 @@ class JioParser {
 
     extractSmsLogs(text) {
         const sms = [];
-        // SMS has 4 trailing numbers: count free chg amt
-        const regex = /(\d{2}\s*-\s*[a-z]{3}\s*-\s*\d{2})\s+(\d{2}\s*:\s*\d{2}\s*:\s*\d{2})\s+(\d{10,15})\s+(\d+)\s+\d+\s+\d+\s+[\d.]+/gi;
+        // SMS has 4 trailing numbers: count free chg amt. We use (?!\s+\d) so it doesn't match Voice which has 5.
+        const regex = /(\d{2}\s*-\s*[a-z]{3}\s*-\s*\d{2})\s+(\d{2}\s*:\s*\d{2}\s*:\s*\d{2})\s+(\d{10,15})\s+(\d+)\s+\d+\s+\d+\s+[\d.]+(?!\s+\d)/gi;
         
-        // Quick trick to avoid matching Voice calls: we can slice text if possible
-        const smsIdx = text.indexOf('3.0 SMS');
+        // Try to start from SMS section, but fallback to full text safely because regex is now strict
+        const smsIdx = text.indexOf(' SMS');
         const parseText = smsIdx !== -1 ? text.substring(smsIdx) : text;
 
         let match;
