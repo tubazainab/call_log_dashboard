@@ -146,17 +146,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Close sidebar on mobile
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('open');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if (overlay) overlay.classList.remove('active');
                 }
             });
         });
 
         // Sidebar Toggle (Mobile)
-        toggleSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-        });
-        closeSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-        });
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        if (toggleSidebarBtn) {
+            toggleSidebarBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isOpen = sidebar.classList.toggle('open');
+                if (sidebarOverlay) {
+                    sidebarOverlay.classList.toggle('active', isOpen);
+                }
+            });
+        }
+
+        if (closeSidebarBtn) {
+            closeSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+            });
+        }
 
         // Theme Toggle
         themeToggle.addEventListener('click', () => {
