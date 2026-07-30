@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=19">
+    <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
     <div class="app-container">
@@ -312,12 +312,69 @@
                             </div>
                         </div>
                     </div>
-                    <!-- SMS Charts Preview -->
+                    <!-- SMS Chart + KPIs -->
                     <div class="charts-grid mt-4 mb-4">
                         <div class="card glass-panel chart-container">
                             <h3>SMS Activity Over Time</h3>
                             <div class="canvas-wrapper">
                                 <canvas id="smsLineChart"></canvas>
+                            </div>
+                        </div>
+                        <!-- SMS KPI Panel -->
+                        <div class="internet-kpi-panel">
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(236,72,153,0.15); color:#ec4899;">
+                                    <i class="fa-solid fa-comment-sms"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Total SMS</span>
+                                    <strong id="kpiSmsTotal">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(139,92,246,0.15); color:#8b5cf6;">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Total Sessions</span>
+                                    <strong id="kpiSmsSessions">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(16,185,129,0.15); color:#10b981;">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Daily Average</span>
+                                    <strong id="kpiSmsDailyAvg">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(245,158,11,0.15); color:#f59e0b;">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Peak Day</span>
+                                    <strong id="kpiSmsPeakDay">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(14,165,233,0.15); color:#0ea5e9;">
+                                    <i class="fa-solid fa-address-book"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Unique Contacts</span>
+                                    <strong id="kpiSmsContacts">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(217,70,239,0.15); color:#d946ef;">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Active Days</span>
+                                    <strong id="kpiSmsActiveDays">—</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -409,6 +466,81 @@
                         </button>
                         <input type="file" id="callsPdfInput" accept="application/pdf" class="hidden">
                     </div>
+                    <!-- Calls KPI Panel -->
+                    <div class="calls-kpi-grid mb-4">
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(59,130,246,0.15); color:#3b82f6;">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Total Calls</span>
+                                <strong id="kpiCallsTotal">—</strong>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(16,185,129,0.15); color:#10b981;">
+                                <i class="fa-solid fa-phone-arrow-down-left"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Incoming</span>
+                                <strong id="kpiCallsIncoming">—</strong>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(139,92,246,0.15); color:#8b5cf6;">
+                                <i class="fa-solid fa-phone-arrow-up-right"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Outgoing</span>
+                                <strong id="kpiCallsOutgoing">—</strong>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(244,63,94,0.15); color:#f43f5e;">
+                                <i class="fa-solid fa-phone-missed"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Missed</span>
+                                <strong id="kpiCallsMissed">—</strong>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(245,158,11,0.15); color:#f59e0b;">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Total Talk Time</span>
+                                <strong id="kpiCallsTalkTime">—</strong>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(14,165,233,0.15); color:#0ea5e9;">
+                                <i class="fa-solid fa-stopwatch"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Avg Duration</span>
+                                <strong id="kpiCallsAvgDur">—</strong>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(217,70,239,0.15); color:#d946ef;">
+                                <i class="fa-solid fa-trophy"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Longest Call</span>
+                                <strong id="kpiCallsLongest">—</strong>
+                            </div>
+                        </div>
+                        <div class="kpi-card glass-panel">
+                            <div class="kpi-icon" style="background: rgba(251,191,36,0.15); color:#fbbf24;">
+                                <i class="fa-solid fa-user-group"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span>Unique Contacts</span>
+                                <strong id="kpiCallsContacts">—</strong>
+                            </div>
+                        </div>
+                    </div>
                     <div class="card glass-panel full-height-card">
                         <div class="table-header-actions">
                             <div class="search-box">
@@ -466,11 +598,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
     
-    <script src="storage.js?v=19"></script>
-    <script src="jio-parser.js?v=19"></script>
-    <script src="dashboard.js?v=19"></script>
-    <script src="charts.js?v=19"></script>
-    <script src="export.js?v=19"></script>
-    <script src="script.js?v=19"></script>
+    <script src="storage.js?v=20"></script>
+    <script src="jio-parser.js?v=20"></script>
+    <script src="dashboard.js?v=20"></script>
+    <script src="charts.js?v=20"></script>
+    <script src="export.js?v=20"></script>
+    <script src="script.js?v=20"></script>
 </body>
 </html>

@@ -131,6 +131,58 @@ class DashboardManager {
         
         const statTotalSMS = document.getElementById('statTotalSMS');
         if (statTotalSMS) statTotalSMS.textContent = totalSms;
+
+        // ---- SMS KPIs ----
+        if (smsData.length > 0) {
+            const setK = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+            const byDate = {};
+            const contacts = new Set();
+            smsData.forEach(s => {
+                byDate[s.date] = (byDate[s.date] || 0) + s.count;
+                if (s.mobileNumber) contacts.add(s.mobileNumber);
+            });
+            const dates = Object.keys(byDate);
+            const vals = Object.values(byDate);
+            const peakIdx = vals.indexOf(Math.max(...vals));
+            const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short'}); } catch { return d; }};
+
+            setK('kpiSmsTotal', totalSms);
+            setK('kpiSmsSessions', smsData.length);
+            setK('kpiSmsDailyAvg', (totalSms / dates.length).toFixed(1) + ' SMS');
+            setK('kpiSmsPeakDay', `${fmtDate(dates[peakIdx])} · ${vals[peakIdx]} SMS`);
+            setK('kpiSmsContacts', contacts.size);
+            setK('kpiSmsActiveDays', `${dates.length} days`);
+        }
+
+        // ---- Calls KPIs ----
+        if (calls.length > 0) {
+            const setK = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+            let incoming = 0, outgoing = 0, missed = 0, totalDur = 0, longestDur = 0;
+            const uniqueContacts = new Set();
+
+            calls.forEach(c => {
+                const type = (c.callType || '').toLowerCase();
+                if (type === 'incoming') incoming++;
+                else if (type === 'outgoing') outgoing++;
+                else if (type === 'missed') missed++;
+                const dur = parseInt(c.duration) || 0;
+                totalDur += dur;
+                if (dur > longestDur) longestDur = dur;
+                if (c.mobileNumber) uniqueContacts.add(c.mobileNumber);
+            });
+            const avgDur = calls.length > 0 ? Math.round(totalDur / calls.length) : 0;
+
+            setK('kpiCallsTotal', calls.length);
+            setK('kpiCallsIncoming', incoming);
+            setK('kpiCallsOutgoing', outgoing);
+            setK('kpiCallsMissed', missed);
+            setK('kpiCallsTalkTime', this.formatDuration(totalDur));
+            setK('kpiCallsAvgDur', this.formatDuration(avgDur));
+            setK('kpiCallsLongest', this.formatDuration(longestDur));
+            setK('kpiCallsContacts', uniqueContacts.size);
+        }
     }
 
     calculatePersonStats(logs) {
