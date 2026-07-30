@@ -58,12 +58,9 @@ class JioParser {
             startTimeDate.setSeconds(startTimeDate.getSeconds() + durationSecs);
             const endTimeStr = startTimeDate.toISOString().substr(11, 8);
 
-            const random = Math.random();
-            let callType = 'outgoing';
-            if (random > 0.85) callType = 'missed';
-            else if (random > 0.4) callType = 'incoming';
-            
-            const finalDuration = callType === 'missed' ? 0 : durationSecs;
+            // Jio bills only show chargeable outgoing calls
+            const callType = 'outgoing';
+            const finalDuration = durationSecs;
 
             calls.push({
                 personName: mobileNumber,
