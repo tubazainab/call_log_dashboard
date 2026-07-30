@@ -186,26 +186,26 @@ class ChartManager {
         });
     }
 
-    renderDurationBarChart(personStats) {
-        const ctx = document.getElementById('durationBarChart');
+    renderHighestCallsChart(personStats) {
+        const ctx = document.getElementById('highestCallsChart');
         if (!ctx || typeof Chart === 'undefined') return;
         
-        if (this.charts.durationBar) {
-            this.charts.durationBar.destroy();
+        if (this.charts.highestCalls) {
+            this.charts.highestCalls.destroy();
         }
 
-        // Get top 10 by talk time for the bar chart so it doesn't get crowded
+        // Get top 10 by total calls
         const topStats = [...personStats]
-            .sort((a, b) => b.totalDuration - a.totalDuration)
+            .sort((a, b) => b.totalCalls - a.totalCalls)
             .slice(0, 10);
 
-        this.charts.durationBar = new Chart(ctx, {
+        this.charts.highestCalls = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: topStats.map(s => s.name),
                 datasets: [{
-                    label: 'Total Duration (Minutes)',
-                    data: topStats.map(s => Math.round(s.totalDuration / 60)),
+                    label: 'Total Calls',
+                    data: topStats.map(s => s.totalCalls),
                     backgroundColor: this.colors.primary,
                     borderRadius: 4
                 }]
@@ -217,7 +217,7 @@ class ChartManager {
                     legend: { display: false }
                 },
                 scales: {
-                    y: { beginAtZero: true }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
                 }
             }
         });
@@ -311,14 +311,9 @@ class ChartManager {
     updateAllCharts(data, personStats) {
         this.renderMainLineChart(data);
         this.renderMainPieChart(data);
-        
-        // These are in the analytics section
-        const analyticsSection = document.getElementById('analytics-section');
-        if (analyticsSection && !analyticsSection.classList.contains('hidden')) {
-            this.renderDurationBarChart(personStats);
-            this.renderCallsDoughnutChart(personStats);
-            this.renderTopTalkersChart(personStats);
-        }
+        this.renderHighestCallsChart(personStats);
+        this.renderCallsDoughnutChart(personStats);
+        this.renderTopTalkersChart(personStats);
     }
     
     // Explicitly update analytics charts when section is shown
