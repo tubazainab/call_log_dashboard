@@ -474,6 +474,7 @@ a {
 
 .chart-container {
     padding: 24px;
+    overflow: hidden;
 }
 
 .chart-container h3 {
@@ -736,40 +737,60 @@ a {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Mobile Responsive */
+/* =============================================
+   RESPONSIVE MEDIA QUERIES - COMPREHENSIVE FIX
+   ============================================= */
+
+/* Tablet / Small Laptop */
 @media (max-width: 1024px) {
-    /* Auto-fit handles layout nicely */
+    .charts-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .charts-grid-large {
+        grid-template-columns: 1fr 1fr;
+    }
+    .grid-2-col {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
+/* Mobile - max 768px */
 @media (max-width: 768px) {
-    /* Grid now uses auto-fit, no need for manual columns */
+    /* All multi-col grids become single column */
     .charts-grid,
-    .charts-grid-large {
-        grid-template-columns: 1fr;
+    .charts-grid-large,
+    .grid-2-col,
+    .summary-cards {
+        grid-template-columns: 1fr !important;
     }
-    
+
+    /* full-width card takes full row in 1-col grid */
+    .chart-container.full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* Sidebar moves to bottom nav on mobile */
     .sidebar {
         position: fixed;
         bottom: 0;
         left: 0;
-        top: auto;
-        width: 100%;
+        top: auto !important;
+        width: 100% !important;
         height: auto;
         border-right: none;
         border-top: 1px solid var(--glass-border);
-        border-bottom: none;
         padding: 0;
         z-index: 1000;
         flex-direction: row;
         background: var(--glass-bg);
         backdrop-filter: blur(12px);
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
     }
-    
+
     .sidebar-header {
-        display: none; /* Hide logo/brand on mobile since it is in top-header */
+        display: none;
     }
-    
+
     .sidebar-nav {
         display: flex;
         flex-direction: row;
@@ -778,7 +799,7 @@ a {
         padding: 0;
         gap: 0;
     }
-    
+
     .nav-item {
         flex-direction: column;
         justify-content: center;
@@ -790,62 +811,133 @@ a {
         font-size: 0.7rem;
         border-radius: 0;
         white-space: nowrap;
+        transform: none !important;
     }
-    
+
     .nav-item i {
         font-size: 1.2rem;
         width: auto;
     }
-    
-    /* Reset hover transform for mobile */
-    .nav-item:hover, .nav-item.active {
-        transform: none;
+
+    .nav-item:hover,
+    .nav-item.active {
+        transform: none !important;
         background: transparent;
         color: var(--primary-color);
         border-top: 2px solid var(--primary-color);
     }
 
+    /* Main content gets left margin removed + bottom padding for bottom nav */
     .main-content {
-        padding: 1rem;
-        margin-left: 0;
-        padding-bottom: 80px; /* Space for bottom nav */
+        padding: 0.75rem;
+        margin-left: 0 !important;
+        padding-bottom: 80px;
     }
 
-    .header-content {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
+    /* Header adjusts */
+    .top-header {
+        padding: 12px 16px;
+        margin-bottom: 16px;
     }
 
     .header-right {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
         gap: 0.5rem;
     }
 
-    .btn {
-        padding: 0.5rem;
-        font-size: 0.85rem;
-    }
-    
+    /* Hide text labels on header buttons */
     .btn-text {
-        display: none; /* Hide button text on mobile, show only icons */
+        display: none;
     }
 
+    /* Form becomes single column */
     .form-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
-    
+
+    /* Canvas height reduced slightly for mobile */
+    .canvas-wrapper {
+        height: 260px;
+        min-height: 260px;
+    }
+
+    /* Stat cards compact */
+    .stat-card {
+        padding: 16px;
+    }
+
+    /* Chart container padding reduced */
+    .chart-container {
+        padding: 16px;
+    }
+
+    /* Table scrolls horizontally */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Filter bar wraps */
+    .filter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    /* Person stat grid */
+    .person-stat-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Leaderboard compact */
+    .leaderboard-item {
+        padding: 12px 0;
+    }
+
+    /* Toast moves above bottom nav */
+    .toast {
+        bottom: 80px;
+        right: 12px;
+        left: 12px;
+        right: 12px;
+    }
+
     .mobile-only {
+        display: flex !important;
+    }
+
+    .desktop-only {
         display: none !important;
     }
 }
 
+/* Small phones */
 @media (max-width: 480px) {
-    .summary-cards { grid-template-columns: 1fr; }
-    .table-header-actions { flex-direction: column; align-items: stretch; }
-    .search-box { width: 100%; }
+    .summary-cards {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .table-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .canvas-wrapper {
+        height: 220px;
+        min-height: 220px;
+    }
+
+    .stat-info p {
+        font-size: 1.1rem;
+    }
+
+    .person-stat-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .analytics-tabs { display: flex; gap: 1rem; }

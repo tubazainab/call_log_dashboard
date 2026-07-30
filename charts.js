@@ -198,6 +198,13 @@ class ChartManager {
                     legend: { display: false }
                 },
                 scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 30,
+                            minRotation: 0,
+                            font: { size: 10 }
+                        }
+                    },
                     y: { beginAtZero: true, ticks: { stepSize: 1 } }
                 }
             }
