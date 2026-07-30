@@ -113,13 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update title
                 pageTitle.textContent = item.querySelector('span').textContent;
                 
-                // Show section
-                const targetId = item.getAttribute('data-target');
+                // Hide ALL sections first (remove active, add hidden)
                 sections.forEach(section => {
                     section.classList.remove('active');
                     section.classList.add('hidden');
                 });
                 
+                // Show target section
+                const targetId = item.getAttribute('data-target');
                 const targetSection = document.getElementById(targetId);
                 targetSection.classList.remove('hidden');
                 

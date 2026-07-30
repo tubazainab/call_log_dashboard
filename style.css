@@ -356,13 +356,20 @@ a {
 /* Sections */
 .content-section {
     display: none;
-    animation: fadeIn 0.4s ease forwards;
 }
 
-.content-section.active { display: block; }
+.content-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.content-section.hidden {
+    display: none !important;
+    animation: none !important;
+}
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }
 

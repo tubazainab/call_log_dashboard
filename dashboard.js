@@ -55,10 +55,13 @@ class DashboardManager {
     }
 
     updateDashboardSummary(stats, internetData = [], smsData = [], calls = []) {
-        document.getElementById('statTotalCalls').textContent = stats.totalCalls;
-        document.getElementById('statIncoming').textContent = stats.incoming;
-        document.getElementById('statOutgoing').textContent = stats.outgoing;
-        document.getElementById('statMissed').textContent = stats.missed;
+        // Safe helper - avoids crash if element doesn't exist
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+        setEl('statTotalCalls', stats.totalCalls);
+        setEl('statIncoming', stats.incoming);
+        setEl('statOutgoing', stats.outgoing);
+        setEl('statMissed', stats.missed);
         
         let totalDuration = 0;
         let longestCall = 0;
@@ -73,9 +76,9 @@ class DashboardManager {
         
         let avgDuration = calls.length > 0 ? Math.round(totalDuration / calls.length) : 0;
         
-        document.getElementById('statTotalDuration').textContent = this.formatDuration(totalDuration);
-        document.getElementById('statAvgDuration').textContent = this.formatDuration(avgDuration);
-        document.getElementById('statLongestCall').textContent = this.formatDuration(longestCall);
+        setEl('statTotalDuration', this.formatDuration(totalDuration));
+        setEl('statAvgDuration', this.formatDuration(avgDuration));
+        setEl('statLongestCall', this.formatDuration(longestCall));
         
         let totalMb = 0;
         internetData.forEach(i => totalMb += i.dataMB);
