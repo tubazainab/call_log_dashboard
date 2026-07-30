@@ -23,6 +23,7 @@
     
     --input-bg: rgba(255, 255, 255, 0.9);
     --input-border: #cbd5e1;
+    --dropdown-bg: #ffffff;
     
     --sidebar-width: 260px;
     --transition-speed: 0.3s;
@@ -57,6 +58,7 @@
     
     --input-bg: rgba(15, 23, 42, 0.8);
     --input-border: #475569;
+    --dropdown-bg: #18181b;
 
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.6);
@@ -330,18 +332,17 @@ a {
     display: none;
     position: absolute;
     right: 0;
-    background-color: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    min-width: 160px;
-    box-shadow: var(--glass-shadow);
+    top: calc(100% + 6px);
+    background-color: var(--dropdown-bg);
+    min-width: 250px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--glass-border);
-    border-radius: 8px;
-    z-index: 10;
+    border-radius: 12px;
+    z-index: 9999;
     overflow: hidden;
-    margin-top: 4px;
     opacity: 0;
     transform: translateY(-10px);
-    transition: opacity 0.2s, transform 0.2s;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .dropdown-content.show {
@@ -352,15 +353,31 @@ a {
 
 .dropdown-content a {
     color: var(--text-primary);
-    padding: 12px 16px;
+    padding: 12px 18px;
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 10px;
-    transition: background-color 0.2s;
+    gap: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.dropdown-content a:hover { background-color: var(--secondary-color); }
+.dropdown-content a i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.dropdown-content a:hover {
+    background-color: var(--primary-color);
+    color: #ffffff !important;
+}
+
+.dropdown-content a:hover i {
+    color: #ffffff !important;
+}
 
 /* Sections */
 .content-section {
