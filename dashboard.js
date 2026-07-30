@@ -18,6 +18,19 @@ class DashboardManager {
         return parts.join('\u00A0');
     }
 
+    getNormalizedCallType(log) {
+        if (!log) return 'outgoing';
+        const raw = String(log.type || log.callType || log['Call Type'] || log.call_type || log.mode || '').trim().toLowerCase();
+        
+        if (raw.includes('inc') || raw.includes('in') || raw.includes('rec') || raw.includes('received')) {
+            return 'incoming';
+        }
+        if (raw.includes('mis') || raw.includes('missed') || raw.includes('rej') || raw.includes('reject')) {
+            return 'missed';
+        }
+        return 'outgoing';
+    }
+
     calculateSummaryStats(logs) {
         let totalDuration = 0;
         let incoming = 0;
@@ -33,9 +46,10 @@ class DashboardManager {
             if (duration > longestCall) longestCall = duration;
             if (duration > 0 && duration < shortestCall) shortestCall = duration;
 
-            if (log.type === 'incoming') incoming++;
-            else if (log.type === 'outgoing') outgoing++;
-            else if (log.type === 'missed') missed++;
+            const type = this.getNormalizedCallType(log);
+            if (type === 'incoming') incoming++;
+            else if (type === 'missed') missed++;
+            else outgoing++;
         });
 
         if (shortestCall === Infinity) shortestCall = 0;
@@ -54,8 +68,117 @@ class DashboardManager {
         };
     }
 
+    updateInternetKpis(internetData = []) {
+        const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        let totalMb = 0;
+        internetData.forEach(i => totalMb += (i.dataMB || 0));
+        const gb = (totalMb / 1024).toFixed(2);
+        
+        const statTotalInternet = document.getElementById('statTotalInternet');
+        if (statTotalInternet) statTotalInternet.textContent = `${gb} GB`;
+
+        if (internetData.length > 0) {
+            const byDate = {};
+            internetData.forEach(i => {
+                byDate[i.date] = (byDate[i.date] || 0) + (i.dataMB || 0);
+            });
+            const dates = Object.keys(byDate);
+            const values = Object.values(byDate);
+
+            const peakIdx = values.indexOf(Math.max(...values));
+            const peakDate = dates[peakIdx];
+            const peakMb = values[peakIdx];
+
+            const lowIdx = values.indexOf(Math.min(...values));
+            const lowDate = dates[lowIdx];
+            const lowMb = values[lowIdx];
+
+            const dailyAvg = totalMb / dates.length;
+            const peakSession = Math.max(...internetData.map(i => i.dataMB || 0));
+
+            const fmtMb = mb => mb >= 1024 ? `${(mb/1024).toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
+            const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short'}); } catch { return d; }};
+
+            setKpi('kpiTotalSessionsVal', internetData.length);
+            setKpi('kpiDailyAvgVal', fmtMb(dailyAvg));
+            setKpi('kpiPeakDayVal', `${fmtDate(peakDate)} · ${fmtMb(peakMb)}`);
+            setKpi('kpiPeakSessionVal', fmtMb(peakSession));
+            setKpi('kpiLowestDayVal', `${fmtDate(lowDate)} · ${fmtMb(lowMb)}`);
+            setKpi('kpiActiveDaysVal', `${dates.length} days`);
+        } else {
+            setKpi('kpiTotalSessionsVal', '0');
+            setKpi('kpiDailyAvgVal', '0 MB');
+            setKpi('kpiPeakDayVal', '—');
+            setKpi('kpiPeakSessionVal', '0 MB');
+            setKpi('kpiLowestDayVal', '—');
+            setKpi('kpiActiveDaysVal', '0 days');
+        }
+    }
+
+    updateSmsKpis(smsData = []) {
+        const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        let totalSms = 0;
+        smsData.forEach(s => totalSms += (s.count || 0));
+        
+        const statTotalSMS = document.getElementById('statTotalSMS');
+        if (statTotalSMS) statTotalSMS.textContent = totalSms;
+
+        if (smsData.length > 0) {
+            const byDate = {};
+            const contacts = new Set();
+            smsData.forEach(s => {
+                byDate[s.date] = (byDate[s.date] || 0) + (s.count || 0);
+                if (s.mobileNumber) contacts.add(s.mobileNumber);
+            });
+            const dates = Object.keys(byDate);
+            const vals = Object.values(byDate);
+            const peakIdx = vals.indexOf(Math.max(...vals));
+            const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short'}); } catch { return d; }};
+
+            setKpi('kpiSmsTotal', totalSms);
+            setKpi('kpiSmsSessions', smsData.length);
+            setKpi('kpiSmsDailyAvg', (totalSms / dates.length).toFixed(1) + ' SMS');
+            setKpi('kpiSmsPeakDay', `${fmtDate(dates[peakIdx])} · ${vals[peakIdx]} SMS`);
+            setKpi('kpiSmsContacts', contacts.size);
+            setKpi('kpiSmsActiveDays', `${dates.length} days`);
+        } else {
+            setKpi('kpiSmsTotal', '0');
+            setKpi('kpiSmsSessions', '0');
+            setKpi('kpiSmsDailyAvg', '0 SMS');
+            setKpi('kpiSmsPeakDay', '—');
+            setKpi('kpiSmsContacts', '0');
+            setKpi('kpiSmsActiveDays', '0 days');
+        }
+    }
+
+    updateCallsKpis(calls = []) {
+        const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        let incoming = 0, outgoing = 0, missed = 0, totalDur = 0, longestDur = 0;
+        const uniqueContacts = new Set();
+
+        calls.forEach(c => {
+            const type = this.getNormalizedCallType(c);
+            if (type === 'incoming') incoming++;
+            else if (type === 'missed') missed++;
+            else outgoing++;
+            const dur = parseInt(c.duration) || 0;
+            totalDur += dur;
+            if (dur > longestDur) longestDur = dur;
+            if (c.mobileNumber) uniqueContacts.add(c.mobileNumber);
+        });
+        const avgDur = calls.length > 0 ? Math.round(totalDur / calls.length) : 0;
+
+        setKpi('kpiCallsTotal', calls.length);
+        setKpi('kpiCallsIncoming', incoming);
+        setKpi('kpiCallsOutgoing', outgoing);
+        setKpi('kpiCallsMissed', missed);
+        setKpi('kpiCallsTalkTime', this.formatDuration(totalDur));
+        setKpi('kpiCallsAvgDur', this.formatDuration(avgDur));
+        setKpi('kpiCallsLongest', this.formatDuration(longestDur));
+        setKpi('kpiCallsContacts', uniqueContacts.size);
+    }
+
     updateDashboardSummary(stats, internetData = [], smsData = [], calls = []) {
-        // Safe helper - avoids crash if element doesn't exist
         const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
         setEl('statTotalCalls', stats.totalCalls);
@@ -67,7 +190,7 @@ class DashboardManager {
         let longestCall = 0;
         
         calls.forEach(log => {
-            const dur = log.duration || 0;
+            const dur = parseInt(log.duration) || 0;
             totalDuration += dur;
             if (dur > longestCall) {
                 longestCall = dur;
@@ -80,109 +203,9 @@ class DashboardManager {
         setEl('statAvgDuration', this.formatDuration(avgDuration));
         setEl('statLongestCall', this.formatDuration(longestCall));
         
-        let totalMb = 0;
-        internetData.forEach(i => totalMb += i.dataMB);
-        const gb = (totalMb / 1024).toFixed(2);
-        
-        const statTotalInternet = document.getElementById('statTotalInternet');
-        if (statTotalInternet) statTotalInternet.textContent = `${gb} GB`;
-
-        // ---- Internet KPIs ----
-        if (internetData.length > 0) {
-            const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-            // Group by date
-            const byDate = {};
-            internetData.forEach(i => {
-                byDate[i.date] = (byDate[i.date] || 0) + i.dataMB;
-            });
-            const dates = Object.keys(byDate);
-            const values = Object.values(byDate);
-
-            // Peak day
-            const peakIdx = values.indexOf(Math.max(...values));
-            const peakDate = dates[peakIdx];
-            const peakMb = values[peakIdx];
-
-            // Lowest day
-            const lowIdx = values.indexOf(Math.min(...values));
-            const lowDate = dates[lowIdx];
-            const lowMb = values[lowIdx];
-
-            // Daily average
-            const dailyAvg = totalMb / dates.length;
-
-            // Peak single session
-            const peakSession = Math.max(...internetData.map(i => i.dataMB));
-
-            const fmtMb = mb => mb >= 1024 ? `${(mb/1024).toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
-            const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short'}); } catch { return d; }};
-
-            setKpi('kpiTotalSessionsVal', internetData.length);
-            setKpi('kpiDailyAvgVal', fmtMb(dailyAvg));
-            setKpi('kpiPeakDayVal', `${fmtDate(peakDate)} · ${fmtMb(peakMb)}`);
-            setKpi('kpiPeakSessionVal', fmtMb(peakSession));
-            setKpi('kpiLowestDayVal', `${fmtDate(lowDate)} · ${fmtMb(lowMb)}`);
-            setKpi('kpiActiveDaysVal', `${dates.length} days`);
-        }
-        
-        let totalSms = 0;
-        smsData.forEach(s => totalSms += s.count);
-        
-        const statTotalSMS = document.getElementById('statTotalSMS');
-        if (statTotalSMS) statTotalSMS.textContent = totalSms;
-
-        // ---- SMS KPIs ----
-        if (smsData.length > 0) {
-            const setK = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-            const byDate = {};
-            const contacts = new Set();
-            smsData.forEach(s => {
-                byDate[s.date] = (byDate[s.date] || 0) + s.count;
-                if (s.mobileNumber) contacts.add(s.mobileNumber);
-            });
-            const dates = Object.keys(byDate);
-            const vals = Object.values(byDate);
-            const peakIdx = vals.indexOf(Math.max(...vals));
-            const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short'}); } catch { return d; }};
-
-            setK('kpiSmsTotal', totalSms);
-            setK('kpiSmsSessions', smsData.length);
-            setK('kpiSmsDailyAvg', (totalSms / dates.length).toFixed(1) + ' SMS');
-            setK('kpiSmsPeakDay', `${fmtDate(dates[peakIdx])} · ${vals[peakIdx]} SMS`);
-            setK('kpiSmsContacts', contacts.size);
-            setK('kpiSmsActiveDays', `${dates.length} days`);
-        }
-
-        // ---- Calls KPIs ----
-        if (calls.length > 0) {
-            const setK = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-
-            let incoming = 0, outgoing = 0, missed = 0, totalDur = 0, longestDur = 0;
-            const uniqueContacts = new Set();
-
-            calls.forEach(c => {
-                const type = (c.callType || '').toLowerCase();
-                if (type === 'incoming') incoming++;
-                else if (type === 'outgoing') outgoing++;
-                else if (type === 'missed') missed++;
-                const dur = parseInt(c.duration) || 0;
-                totalDur += dur;
-                if (dur > longestDur) longestDur = dur;
-                if (c.mobileNumber) uniqueContacts.add(c.mobileNumber);
-            });
-            const avgDur = calls.length > 0 ? Math.round(totalDur / calls.length) : 0;
-
-            setK('kpiCallsTotal', calls.length);
-            setK('kpiCallsIncoming', incoming);
-            setK('kpiCallsOutgoing', outgoing);
-            setK('kpiCallsMissed', missed);
-            setK('kpiCallsTalkTime', this.formatDuration(totalDur));
-            setK('kpiCallsAvgDur', this.formatDuration(avgDur));
-            setK('kpiCallsLongest', this.formatDuration(longestDur));
-            setK('kpiCallsContacts', uniqueContacts.size);
-        }
+        this.updateInternetKpis(internetData);
+        this.updateSmsKpis(smsData);
+        this.updateCallsKpis(calls);
     }
 
     calculatePersonStats(logs) {

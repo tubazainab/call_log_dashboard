@@ -193,9 +193,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        if (applyCustomDateBtn) {
-            applyCustomDateBtn.addEventListener('click', () => {
-                updateDashboardView();
+        // Calls Section Date & Time Filters
+        ['callsStartDate', 'callsEndDate', 'callsStartTime', 'callsEndTime'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', renderTable);
+        });
+        const resetCallsFilterBtn = document.getElementById('resetCallsFilterBtn');
+        if (resetCallsFilterBtn) {
+            resetCallsFilterBtn.addEventListener('click', () => {
+                ['callsStartDate', 'callsEndDate', 'callsStartTime', 'callsEndTime'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                renderTable();
+            });
+        }
+
+        // Internet Section Date & Time Filters
+        ['internetStartDate', 'internetEndDate', 'internetStartTime', 'internetEndTime'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', renderInternetTable);
+        });
+        const resetInternetFilterBtn = document.getElementById('resetInternetFilterBtn');
+        if (resetInternetFilterBtn) {
+            resetInternetFilterBtn.addEventListener('click', () => {
+                ['internetStartDate', 'internetEndDate', 'internetStartTime', 'internetEndTime'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                renderInternetTable();
+            });
+        }
+
+        // SMS Section Date & Time Filters
+        ['smsStartDate', 'smsEndDate', 'smsStartTime', 'smsEndTime'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', renderSmsTable);
+        });
+        const resetSmsFilterBtn = document.getElementById('resetSmsFilterBtn');
+        if (resetSmsFilterBtn) {
+            resetSmsFilterBtn.addEventListener('click', () => {
+                ['smsStartDate', 'smsEndDate', 'smsStartTime', 'smsEndTime'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                renderSmsTable();
             });
         }
 
@@ -529,14 +571,48 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTable();
     }
 
+    function filterLogsByDateTime(logs, startDateId, endDateId, startTimeId, endTimeId) {
+        const startDate = document.getElementById(startDateId)?.value;
+        const endDate = document.getElementById(endDateId)?.value;
+        const startTime = document.getElementById(startTimeId)?.value;
+        const endTime = document.getElementById(endTimeId)?.value;
+
+        return (logs || []).filter(item => {
+            if (startDate && item.date < startDate) return false;
+            if (endDate && item.date > endDate) return false;
+
+            const timeVal = item.startTime || item.time || '';
+            if (timeVal) {
+                const itemTimeShort = timeVal.slice(0, 5);
+                if (startTime && itemTimeShort < startTime) return false;
+                if (endTime && itemTimeShort > endTime) return false;
+            }
+            return true;
+        });
+    }
+
+    function getCallsFilteredLogs() {
+        return filterLogsByDateTime(currentLogs, 'callsStartDate', 'callsEndDate', 'callsStartTime', 'callsEndTime');
+    }
+
+    function getInternetFilteredLogs() {
+        return filterLogsByDateTime(currentInternet, 'internetStartDate', 'internetEndDate', 'internetStartTime', 'internetEndTime');
+    }
+
+    function getSmsFilteredLogs() {
+        return filterLogsByDateTime(currentSms, 'smsStartDate', 'smsEndDate', 'smsStartTime', 'smsEndTime');
+    }
+
     function getFilteredLogs() {
         const search = searchInput.value.toLowerCase();
         const type = filterType.value;
+        const dateTimeFiltered = getCallsFilteredLogs();
 
-        return currentLogs.filter(log => {
-            const matchesSearch = log.personName.toLowerCase().includes(search) || 
-                                  log.mobileNumber.includes(search);
-            const matchesType = type === 'all' || log.type === type;
+        return dateTimeFiltered.filter(log => {
+            const matchesSearch = (log.personName || '').toLowerCase().includes(search) || 
+                                  (log.mobileNumber || '').includes(search);
+            const logType = dashboardManager.getNormalizedCallType(log);
+            const matchesType = type === 'all' || logType === type;
             
             return matchesSearch && matchesType;
         });
@@ -553,11 +629,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 valA = new Date(`${a.date}T${a.startTime || '00:00'}`);
                 valB = new Date(`${b.date}T${b.startTime || '00:00'}`);
             } else if (currentSort.column === 'name') {
-                valA = a.personName.toLowerCase();
-                valB = b.personName.toLowerCase();
+                valA = (a.personName || '').toLowerCase();
+                valB = (b.personName || '').toLowerCase();
             } else if (currentSort.column === 'duration') {
-                valA = a.duration;
-                valB = b.duration;
+                valA = a.duration || 0;
+                valB = b.duration || 0;
             }
 
             if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
@@ -571,90 +647,105 @@ document.addEventListener('DOMContentLoaded', () => {
         if (logsToRender.length === 0) {
             callTable.classList.add('hidden');
             emptyTableState.classList.remove('hidden');
-            return;
+        } else {
+            callTable.classList.remove('hidden');
+            emptyTableState.classList.add('hidden');
+
+            logsToRender.forEach(log => {
+                const tr = document.createElement('tr');
+                
+                // Format Type Badge
+                let badgeClass = '';
+                let iconClass = '';
+                const logType = dashboardManager.getNormalizedCallType(log);
+                if (logType === 'incoming') { badgeClass = 'badge-incoming'; iconClass = 'fa-arrow-down'; }
+                else if (logType === 'outgoing') { badgeClass = 'badge-outgoing'; iconClass = 'fa-arrow-up'; }
+                else if (logType === 'missed') { badgeClass = 'badge-missed'; iconClass = 'fa-phone-slash'; }
+
+                const typeLabel = logType.charAt(0).toUpperCase() + logType.slice(1);
+                const durationDisplay = log.duration ? dashboardManager.formatDuration(log.duration) : '0m';
+                
+                // Format Date safely
+                let formattedDate = log.date;
+                try { formattedDate = new Date(log.date).toLocaleDateString(); } catch(e){}
+
+                tr.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td class="font-medium">${log.personName}</td>
+                    <td class="text-muted">${log.mobileNumber}</td>
+                    <td><span class="badge ${badgeClass}"><i class="fa-solid ${iconClass}"></i> ${typeLabel}</span></td>
+                    <td class="text-muted">${log.startTime || '-'} to ${log.endTime || '-'}</td>
+                    <td class="font-medium">${durationDisplay}</td>
+                    <td class="text-muted" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${log.notes || ''}">${log.notes || '-'}</td>
+                    <td class="action-btns">
+                        <button class="btn-icon btn-small text-primary" onclick="handleEdit('${log.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-icon btn-small text-danger" onclick="handleDelete('${log.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                callTableBody.appendChild(tr);
+            });
         }
 
-        callTable.classList.remove('hidden');
-        emptyTableState.classList.add('hidden');
-
-        logsToRender.forEach(log => {
-            const tr = document.createElement('tr');
-            
-            // Format Type Badge
-            let badgeClass = '';
-            let iconClass = '';
-            if (log.type === 'incoming') { badgeClass = 'badge-incoming'; iconClass = 'fa-arrow-down'; }
-            else if (log.type === 'outgoing') { badgeClass = 'badge-outgoing'; iconClass = 'fa-arrow-up'; }
-            else if (log.type === 'missed') { badgeClass = 'badge-missed'; iconClass = 'fa-phone-slash'; }
-
-            const typeLabel = log.type.charAt(0).toUpperCase() + log.type.slice(1);
-            const durationDisplay = log.duration ? dashboardManager.formatDuration(log.duration) : '0m';
-            
-            // Format Date safely
-            let formattedDate = log.date;
-            try { formattedDate = new Date(log.date).toLocaleDateString(); } catch(e){}
-
-            tr.innerHTML = `
-                <td>${formattedDate}</td>
-                <td class="font-medium">${log.personName}</td>
-                <td class="text-muted">${log.mobileNumber}</td>
-                <td><span class="badge ${badgeClass}"><i class="fa-solid ${iconClass}"></i> ${typeLabel}</span></td>
-                <td class="text-muted">${log.startTime || '-'} to ${log.endTime || '-'}</td>
-                <td class="font-medium">${durationDisplay}</td>
-                <td class="text-muted" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${log.notes || ''}">${log.notes || '-'}</td>
-                <td class="action-btns">
-                    <button class="btn-icon btn-small text-primary" onclick="handleEdit('${log.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                    <button class="btn-icon btn-small text-danger" onclick="handleDelete('${log.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            `;
-            callTableBody.appendChild(tr);
-        });
+        // Update Calls section KPIs with filtered calls
+        dashboardManager.updateCallsKpis(getCallsFilteredLogs());
     }
 
     function renderInternetTable() {
+        const filteredInternet = getInternetFilteredLogs();
         internetTableBody.innerHTML = '';
-        if (currentInternet.length === 0) {
+
+        if (filteredInternet.length === 0) {
             document.getElementById('internetTable').classList.add('hidden');
             emptyInternetState.classList.remove('hidden');
-            return;
-        }
-        
-        document.getElementById('internetTable').classList.remove('hidden');
-        emptyInternetState.classList.add('hidden');
+        } else {
+            document.getElementById('internetTable').classList.remove('hidden');
+            emptyInternetState.classList.add('hidden');
 
-        currentInternet.forEach(log => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${log.date}</td>
-                <td class="text-muted">${log.startTime}</td>
-                <td class="text-muted">${log.endTime}</td>
-                <td class="font-medium text-primary">${log.dataMB.toFixed(2)} MB</td>
-            `;
-            internetTableBody.appendChild(tr);
-        });
+            filteredInternet.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.date}</td>
+                    <td class="text-muted">${log.startTime}</td>
+                    <td class="text-muted">${log.endTime}</td>
+                    <td class="font-medium text-primary">${(log.dataMB || 0).toFixed(2)} MB</td>
+                `;
+                internetTableBody.appendChild(tr);
+            });
+        }
+
+        dashboardManager.updateInternetKpis(filteredInternet);
+        if (chartManager.renderInternetLineChart) {
+            chartManager.renderInternetLineChart(filteredInternet);
+        }
     }
 
     function renderSmsTable() {
+        const filteredSms = getSmsFilteredLogs();
         smsTableBody.innerHTML = '';
-        if (currentSms.length === 0) {
+
+        if (filteredSms.length === 0) {
             document.getElementById('smsTable').classList.add('hidden');
             emptySmsState.classList.remove('hidden');
-            return;
-        }
-        
-        document.getElementById('smsTable').classList.remove('hidden');
-        emptySmsState.classList.add('hidden');
+        } else {
+            document.getElementById('smsTable').classList.remove('hidden');
+            emptySmsState.classList.add('hidden');
 
-        currentSms.forEach(log => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${log.date}</td>
-                <td class="text-muted">${log.time}</td>
-                <td class="font-medium">${log.mobileNumber}</td>
-                <td class="text-primary">${log.count}</td>
-            `;
-            smsTableBody.appendChild(tr);
-        });
+            filteredSms.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${log.date}</td>
+                    <td class="text-muted">${log.time}</td>
+                    <td class="font-medium">${log.mobileNumber}</td>
+                    <td class="text-primary">${log.count}</td>
+                `;
+                smsTableBody.appendChild(tr);
+            });
+        }
+
+        dashboardManager.updateSmsKpis(filteredSms);
+        if (chartManager.renderSmsLineChart) {
+            chartManager.renderSmsLineChart(filteredSms);
+        }
     }
 
     function filterByDate(dataArray) {
@@ -702,13 +793,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const personStats = dashboardManager.updateAll(logsToProcess, internetToProcess, smsToProcess);
         chartManager.updateAllCharts(logsToProcess, personStats);
-        
-        if (chartManager.renderInternetLineChart) {
-            chartManager.renderInternetLineChart(internetToProcess);
-        }
-        if (chartManager.renderSmsLineChart) {
-            chartManager.renderSmsLineChart(smsToProcess);
-        }
     }
 
     function updateAllViews() {

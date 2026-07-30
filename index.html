@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=25">
+    <link rel="stylesheet" href="style.css?v=29">
 </head>
 <body>
     <div class="app-container">
@@ -209,6 +209,26 @@
                         </button>
                         <input type="file" id="internetPdfInput" accept="application/pdf" class="hidden">
                     </div>
+                    <!-- Internet Date & Time Filter Bar -->
+                    <div class="filter-bar glass-panel mb-4">
+                        <div class="section-filter-grid">
+                            <div class="filter-group">
+                                <label><i class="fa-solid fa-calendar text-primary"></i> Date Range:</label>
+                                <input type="date" id="internetStartDate" class="glass-input" title="Start Date">
+                                <span style="color:var(--text-secondary)">to</span>
+                                <input type="date" id="internetEndDate" class="glass-input" title="End Date">
+                            </div>
+                            <div class="filter-group">
+                                <label><i class="fa-solid fa-clock text-info"></i> Time Range:</label>
+                                <input type="time" id="internetStartTime" class="glass-input" title="Start Time">
+                                <span style="color:var(--text-secondary)">to</span>
+                                <input type="time" id="internetEndTime" class="glass-input" title="End Time">
+                            </div>
+                            <div class="filter-actions">
+                                <button id="resetInternetFilterBtn" class="btn btn-secondary btn-small"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="summary-cards">
                         <div class="card glass-panel stat-card">
                             <div class="stat-icon duration" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><i class="fa-solid fa-wifi"></i></div>
@@ -317,6 +337,26 @@
                             <i class="fa-solid fa-file-pdf"></i> <span class="btn-text">Upload SMS Logs</span>
                         </button>
                         <input type="file" id="smsPdfInput" accept="application/pdf" class="hidden">
+                    </div>
+                    <!-- SMS Date & Time Filter Bar -->
+                    <div class="filter-bar glass-panel mb-4">
+                        <div class="section-filter-grid">
+                            <div class="filter-group">
+                                <label><i class="fa-solid fa-calendar text-primary"></i> Date Range:</label>
+                                <input type="date" id="smsStartDate" class="glass-input" title="Start Date">
+                                <span style="color:var(--text-secondary)">to</span>
+                                <input type="date" id="smsEndDate" class="glass-input" title="End Date">
+                            </div>
+                            <div class="filter-group">
+                                <label><i class="fa-solid fa-clock text-info"></i> Time Range:</label>
+                                <input type="time" id="smsStartTime" class="glass-input" title="Start Time">
+                                <span style="color:var(--text-secondary)">to</span>
+                                <input type="time" id="smsEndTime" class="glass-input" title="End Time">
+                            </div>
+                            <div class="filter-actions">
+                                <button id="resetSmsFilterBtn" class="btn btn-secondary btn-small"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="summary-cards">
                         <div class="card glass-panel stat-card">
@@ -484,6 +524,26 @@
                         </button>
                         <input type="file" id="callsPdfInput" accept="application/pdf" class="hidden">
                     </div>
+                    <!-- Calls Date & Time Filter Bar -->
+                    <div class="filter-bar glass-panel mb-4">
+                        <div class="section-filter-grid">
+                            <div class="filter-group">
+                                <label><i class="fa-solid fa-calendar text-primary"></i> Date Range:</label>
+                                <input type="date" id="callsStartDate" class="glass-input" title="Start Date">
+                                <span style="color:var(--text-secondary)">to</span>
+                                <input type="date" id="callsEndDate" class="glass-input" title="End Date">
+                            </div>
+                            <div class="filter-group">
+                                <label><i class="fa-solid fa-clock text-info"></i> Time Range:</label>
+                                <input type="time" id="callsStartTime" class="glass-input" title="Start Time">
+                                <span style="color:var(--text-secondary)">to</span>
+                                <input type="time" id="callsEndTime" class="glass-input" title="End Time">
+                            </div>
+                            <div class="filter-actions">
+                                <button id="resetCallsFilterBtn" class="btn btn-secondary btn-small"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                            </div>
+                        </div>
+                    </div>
                     <!-- Calls KPI Panel -->
                     <div class="calls-kpi-grid mb-4">
                         <div class="kpi-card glass-panel">
@@ -616,11 +676,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
     
-    <script src="storage.js?v=25"></script>
-    <script src="jio-parser.js?v=25"></script>
-    <script src="dashboard.js?v=25"></script>
-    <script src="charts.js?v=25"></script>
-    <script src="export.js?v=25"></script>
-    <script src="script.js?v=25"></script>
+    <script src="storage.js?v=29"></script>
+    <script src="jio-parser.js?v=29"></script>
+    <script src="dashboard.js?v=29"></script>
+    <script src="charts.js?v=29"></script>
+    <script src="export.js?v=29"></script>
+    <script src="script.js?v=29"></script>
 </body>
 </html>
