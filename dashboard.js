@@ -86,6 +86,45 @@ class DashboardManager {
         
         const statTotalInternet = document.getElementById('statTotalInternet');
         if (statTotalInternet) statTotalInternet.textContent = `${gb} GB`;
+
+        // ---- Internet KPIs ----
+        if (internetData.length > 0) {
+            const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+            // Group by date
+            const byDate = {};
+            internetData.forEach(i => {
+                byDate[i.date] = (byDate[i.date] || 0) + i.dataMB;
+            });
+            const dates = Object.keys(byDate);
+            const values = Object.values(byDate);
+
+            // Peak day
+            const peakIdx = values.indexOf(Math.max(...values));
+            const peakDate = dates[peakIdx];
+            const peakMb = values[peakIdx];
+
+            // Lowest day
+            const lowIdx = values.indexOf(Math.min(...values));
+            const lowDate = dates[lowIdx];
+            const lowMb = values[lowIdx];
+
+            // Daily average
+            const dailyAvg = totalMb / dates.length;
+
+            // Peak single session
+            const peakSession = Math.max(...internetData.map(i => i.dataMB));
+
+            const fmtMb = mb => mb >= 1024 ? `${(mb/1024).toFixed(2)} GB` : `${mb.toFixed(1)} MB`;
+            const fmtDate = d => { try { return new Date(d).toLocaleDateString('en-IN', {day:'numeric', month:'short'}); } catch { return d; }};
+
+            setKpi('kpiTotalSessionsVal', internetData.length);
+            setKpi('kpiDailyAvgVal', fmtMb(dailyAvg));
+            setKpi('kpiPeakDayVal', `${fmtDate(peakDate)} · ${fmtMb(peakMb)}`);
+            setKpi('kpiPeakSessionVal', fmtMb(peakSession));
+            setKpi('kpiLowestDayVal', `${fmtDate(lowDate)} · ${fmtMb(lowMb)}`);
+            setKpi('kpiActiveDaysVal', `${dates.length} days`);
+        }
         
         let totalSms = 0;
         smsData.forEach(s => totalSms += s.count);

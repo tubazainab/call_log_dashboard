@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=18">
+    <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
     <div class="app-container">
@@ -206,12 +206,69 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Internet Charts Preview -->
+                    <!-- Internet Charts + KPIs -->
                     <div class="charts-grid mt-4 mb-4">
                         <div class="card glass-panel chart-container">
                             <h3>Internet Usage Over Time</h3>
                             <div class="canvas-wrapper">
                                 <canvas id="internetLineChart"></canvas>
+                            </div>
+                        </div>
+                        <!-- KPI Panel -->
+                        <div class="internet-kpi-panel">
+                            <div class="kpi-card glass-panel" id="kpiTotalSessions">
+                                <div class="kpi-icon" style="background: rgba(139,92,246,0.15); color:#8b5cf6;">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Total Sessions</span>
+                                    <strong id="kpiTotalSessionsVal">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(16,185,129,0.15); color:#10b981;">
+                                    <i class="fa-solid fa-gauge-high"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Daily Average</span>
+                                    <strong id="kpiDailyAvgVal">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(245,158,11,0.15); color:#f59e0b;">
+                                    <i class="fa-solid fa-calendar-star"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Peak Day</span>
+                                    <strong id="kpiPeakDayVal">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(14,165,233,0.15); color:#0ea5e9;">
+                                    <i class="fa-solid fa-arrow-up-wide-short"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Peak Session</span>
+                                    <strong id="kpiPeakSessionVal">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(244,63,94,0.15); color:#f43f5e;">
+                                    <i class="fa-solid fa-droplet"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Lowest Day</span>
+                                    <strong id="kpiLowestDayVal">—</strong>
+                                </div>
+                            </div>
+                            <div class="kpi-card glass-panel">
+                                <div class="kpi-icon" style="background: rgba(217,70,239,0.15); color:#d946ef;">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                </div>
+                                <div class="kpi-info">
+                                    <span>Active Days</span>
+                                    <strong id="kpiActiveDaysVal">—</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -409,11 +466,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js"></script>
     
-    <script src="storage.js?v=18"></script>
-    <script src="jio-parser.js?v=18"></script>
-    <script src="dashboard.js?v=18"></script>
-    <script src="charts.js?v=18"></script>
-    <script src="export.js?v=18"></script>
-    <script src="script.js?v=18"></script>
+    <script src="storage.js?v=19"></script>
+    <script src="jio-parser.js?v=19"></script>
+    <script src="dashboard.js?v=19"></script>
+    <script src="charts.js?v=19"></script>
+    <script src="export.js?v=19"></script>
+    <script src="script.js?v=19"></script>
 </body>
 </html>
