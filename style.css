@@ -480,6 +480,7 @@ a {
 .canvas-wrapper {
     position: relative;
     height: 300px;
+    min-height: 300px;
     width: 100%;
 }
 
@@ -735,7 +736,8 @@ a {
 
 @media (max-width: 768px) {
     /* Grid now uses auto-fit, no need for manual columns */
-    .charts-grid {
+    .charts-grid,
+    .charts-grid-large {
         grid-template-columns: 1fr;
     }
     
