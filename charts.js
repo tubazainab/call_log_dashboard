@@ -448,13 +448,7 @@ class ChartManager {
         }
     }
 
-    updateAllCharts(logs, personStats) {
-        this.renderMainLineChart(logs);
-        this.renderMainPieChart(logs);
-        this.renderDurationBarChart(personStats);
-        this.renderCallsDoughnutChart(personStats);
-        this.renderTopTalkersChart(personStats);
-    }
+
 }
 
 const chartManager = new ChartManager();
