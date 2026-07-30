@@ -155,16 +155,25 @@ a {
 }
 
 .sidebar-header {
-    padding: 24px;
+    padding: 20px 24px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     border-bottom: 1px solid var(--glass-border);
 }
 
 .logo-icon {
-    font-size: 1.8rem;
-    color: var(--primary-color);
+    font-size: 1.3rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-color), #a855f7);
+    color: #ffffff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+    flex-shrink: 0;
 }
 
 .sidebar-nav {
@@ -552,16 +561,45 @@ a {
     padding-top: 24px;
 }
 
+/* Card Headings */
+.card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.card h2 i {
+    font-size: 1.1rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 /* Tables */
-.full-height-card { min-height: 500px; }
+.full-height-card { 
+    min-height: 500px;
+    padding: 24px;
+}
+
 .table-header-actions {
-    padding: 20px;
+    padding: 0 0 20px 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--glass-border);
     flex-wrap: wrap;
     gap: 16px;
+    margin-bottom: 16px;
 }
 
 .search-box {
@@ -895,9 +933,26 @@ a {
         grid-column: 1 / -1;
     }
 
-    /* ---- Charts ---- */
+    /* ---- Charts & Cards ---- */
     .chart-container {
         padding: 16px;
+    }
+
+    .full-height-card {
+        padding: 16px;
+    }
+
+    .card h2 {
+        font-size: 1.1rem;
+        margin-bottom: 14px;
+        gap: 10px;
+    }
+
+    .card h2 i {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+        border-radius: 8px;
     }
 
     .chart-container h3 {
