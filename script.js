@@ -128,8 +128,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetSection.classList.add('active');
                 
                 // Special actions on section load
-                if (targetId === 'analytics-section') {
-                    chartManager.updateAnalyticsCharts(dashboardManager.personStats);
+                if (targetId === 'dashboard-section') {
+                    chartManager.updateAllCharts(currentLogs, dashboardManager.personStats);
+                }
+                if (targetId === 'internet-section') {
+                    chartManager.renderInternetLineChart(currentInternet);
+                }
+                if (targetId === 'sms-section') {
+                    chartManager.renderSmsLineChart(currentSms);
                 }
                 
                 // Close sidebar on mobile
