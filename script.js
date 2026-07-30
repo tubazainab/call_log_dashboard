@@ -56,6 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportCSVBtn = document.getElementById('exportCSV');
     const exportExcelBtn = document.getElementById('exportExcel');
     const printDashBtn = document.getElementById('printDash');
+
+    const exportInternetExcelBtn = document.getElementById('exportInternetExcelBtn');
+    const exportSmsExcelBtn = document.getElementById('exportSmsExcelBtn');
+    const exportCallsExcelBtn = document.getElementById('exportCallsExcelBtn');
     
     const importCallsBtn = document.getElementById('importCallsBtn');
     const callsPdfInput = document.getElementById('callsPdfInput');
@@ -221,8 +225,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         exportExcelBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            exportManager.exportToExcel(currentLogs);
+            exportManager.exportToExcel(currentLogs, currentInternet, currentSms, dashboardManager.personStats);
         });
+
+        if (exportInternetExcelBtn) {
+            exportInternetExcelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportManager.exportInternetExcel(currentInternet);
+            });
+        }
+
+        if (exportSmsExcelBtn) {
+            exportSmsExcelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportManager.exportSmsExcel(currentSms);
+            });
+        }
+
+        if (exportCallsExcelBtn) {
+            exportCallsExcelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportManager.exportCallsExcel(currentLogs);
+            });
+        }
 
         printDashBtn.addEventListener('click', (e) => {
             e.preventDefault();
