@@ -77,19 +77,18 @@ class ChartManager {
         
         sortedData.forEach(log => {
             if (!dateMap[log.date]) {
-                dateMap[log.date] = { incoming: 0, outgoing: 0, missed: 0 };
+                dateMap[log.date] = { calls: 0, duration: 0 };
             }
-            dateMap[log.date][log.type]++;
+            dateMap[log.date].calls++;
+            dateMap[log.date].duration += (log.duration || 0);
         });
 
         const labels = Object.keys(dateMap).map(date => {
-            // Format date for display
             return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         });
         
-        const incomingData = Object.values(dateMap).map(d => d.incoming);
-        const outgoingData = Object.values(dateMap).map(d => d.outgoing);
-        const missedData = Object.values(dateMap).map(d => d.missed);
+        const callsData = Object.values(dateMap).map(d => d.calls);
+        const durationData = Object.values(dateMap).map(d => Math.round(d.duration / 60)); // in minutes
         
         const chartType = labels.length <= 1 ? 'bar' : 'line';
 
@@ -99,28 +98,20 @@ class ChartManager {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Incoming',
-                        data: incomingData,
+                        label: 'Total Calls',
+                        data: callsData,
+                        borderColor: this.colors.primary,
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Talk Time (Mins)',
+                        data: durationData,
                         borderColor: this.colors.success,
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: 'Outgoing',
-                        data: outgoingData,
-                        borderColor: this.colors.primary,
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: 'Missed',
-                        data: missedData,
-                        borderColor: this.colors.danger,
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        tension: 0.4,
-                        fill: true
+                        yAxisID: 'y1'
                     }
                 ]
             },
@@ -138,49 +129,73 @@ class ChartManager {
                 },
                 scales: {
                     y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Total Calls' },
                         beginAtZero: true,
                         ticks: { stepSize: 1 }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Talk Time (Mins)' },
+                        beginAtZero: true,
+                        grid: { drawOnChartArea: false }
                     }
                 }
             }
         });
     }
 
-    renderMainPieChart(data) {
-        const ctx = document.getElementById('mainPieChart');
+    renderTimeOfDayChart(data) {
+        const ctx = document.getElementById('timeOfDayChart');
         if (!ctx || typeof Chart === 'undefined') return;
 
         if (this.charts.mainPie) {
             this.charts.mainPie.destroy();
         }
 
-        let incoming = 0, outgoing = 0, missed = 0;
+        const timeSlots = {
+            'Morning (6AM-12PM)': 0,
+            'Afternoon (12PM-5PM)': 0,
+            'Evening (5PM-9PM)': 0,
+            'Night (9PM-6AM)': 0
+        };
+
         data.forEach(log => {
-            if (log.type === 'incoming') incoming++;
-            else if (log.type === 'outgoing') outgoing++;
-            else if (log.type === 'missed') missed++;
+            const hour = parseInt(log.time.split(':')[0], 10);
+            if (hour >= 6 && hour < 12) timeSlots['Morning (6AM-12PM)']++;
+            else if (hour >= 12 && hour < 17) timeSlots['Afternoon (12PM-5PM)']++;
+            else if (hour >= 17 && hour < 21) timeSlots['Evening (5PM-9PM)']++;
+            else timeSlots['Night (9PM-6AM)']++;
         });
 
         this.charts.mainPie = new Chart(ctx, {
-            type: 'pie',
+            type: 'bar',
             data: {
-                labels: ['Incoming', 'Outgoing', 'Missed'],
+                labels: Object.keys(timeSlots),
                 datasets: [{
-                    data: [incoming, outgoing, missed],
+                    label: 'Number of Calls',
+                    data: Object.values(timeSlots),
                     backgroundColor: [
-                        this.colors.success,
+                        this.colors.warning,
+                        this.colors.orange,
                         this.colors.primary,
-                        this.colors.danger
+                        this.colors.info
                     ],
-                    borderWidth: 0,
-                    hoverOffset: 4
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
                 }
             }
         });
@@ -310,7 +325,7 @@ class ChartManager {
     
     updateAllCharts(data, personStats) {
         this.renderMainLineChart(data);
-        this.renderMainPieChart(data);
+        this.renderTimeOfDayChart(data);
         this.renderHighestCallsChart(personStats);
         this.renderCallsDoughnutChart(personStats);
         this.renderTopTalkersChart(personStats);

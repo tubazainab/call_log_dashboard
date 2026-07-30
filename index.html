@@ -114,21 +114,24 @@
                             </div>
                         </div>
                         <div class="card glass-panel stat-card">
+                            <div class="stat-icon duration"><i class="fa-solid fa-clock"></i></div>
                             <div class="stat-info">
-                                <h5><i class="fa-solid fa-arrow-down incoming-color"></i> Incoming</h5>
-                                <h4 id="statIncoming">0</h4>
+                                <h3>Total Duration</h3>
+                                <p id="statTotalDuration">0m</p>
                             </div>
                         </div>
                         <div class="card glass-panel stat-card">
+                            <div class="stat-icon avg"><i class="fa-solid fa-stopwatch"></i></div>
                             <div class="stat-info">
-                                <h5><i class="fa-solid fa-arrow-up outgoing-color"></i> Outgoing</h5>
-                                <h4 id="statOutgoing">0</h4>
+                                <h3>Avg Duration</h3>
+                                <p id="statAvgDuration">0s</p>
                             </div>
                         </div>
                         <div class="card glass-panel stat-card">
+                            <div class="stat-icon long"><i class="fa-solid fa-arrow-up-right-dots"></i></div>
                             <div class="stat-info">
-                                <h5><i class="fa-solid fa-phone-slash missed-color"></i> Missed</h5>
-                                <h4 id="statMissed">0</h4>
+                                <h3>Longest Call</h3>
+                                <p id="statLongestCall">0m</p>
                             </div>
                         </div>
                     </div>
@@ -141,9 +144,9 @@
                             </div>
                         </div>
                         <div class="card glass-panel chart-container">
-                            <h3>Call Types</h3>
+                            <h3>Calls by Time of Day</h3>
                             <div class="canvas-wrapper">
-                                <canvas id="mainPieChart"></canvas>
+                                <canvas id="timeOfDayChart"></canvas>
                             </div>
                         </div>
                     </div>

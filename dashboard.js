@@ -54,11 +54,28 @@ class DashboardManager {
         };
     }
 
-    updateDashboardSummary(stats, internetData = [], smsData = []) {
+    updateDashboardSummary(stats, internetData = [], smsData = [], calls = []) {
         document.getElementById('statTotalCalls').textContent = stats.totalCalls;
         document.getElementById('statIncoming').textContent = stats.incoming;
         document.getElementById('statOutgoing').textContent = stats.outgoing;
         document.getElementById('statMissed').textContent = stats.missed;
+        
+        let totalDuration = 0;
+        let longestCall = 0;
+        
+        calls.forEach(log => {
+            const dur = log.duration || 0;
+            totalDuration += dur;
+            if (dur > longestCall) {
+                longestCall = dur;
+            }
+        });
+        
+        let avgDuration = calls.length > 0 ? Math.round(totalDuration / calls.length) : 0;
+        
+        document.getElementById('statTotalDuration').textContent = this.formatDuration(totalDuration);
+        document.getElementById('statAvgDuration').textContent = this.formatDuration(avgDuration);
+        document.getElementById('statLongestCall').textContent = this.formatDuration(longestCall);
         
         let totalMb = 0;
         internetData.forEach(i => totalMb += i.dataMB);
@@ -204,7 +221,7 @@ class DashboardManager {
 
     updateAll(logs, internet = [], sms = []) {
         const stats = this.calculateSummaryStats(logs);
-        this.updateDashboardSummary(stats, internet, sms);
+        this.updateDashboardSummary(stats, internet, sms, logs);
         
         this.calculatePersonStats(logs);
         this.renderLeaderboard();
