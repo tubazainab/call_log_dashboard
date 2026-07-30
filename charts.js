@@ -4,6 +4,7 @@ class ChartManager {
             mainLine: null,
             mainPie: null,
             durationBar: null,
+            highestCalls: null,
             callsDoughnut: null,
             topTalkers: null,
             internetLine: null,
@@ -165,7 +166,9 @@ class ChartManager {
         };
 
         data.forEach(log => {
-            const hour = parseInt(log.time.split(':')[0], 10);
+            // Support both 'time' and 'startTime' field names
+            const timeField = log.startTime || log.time || '00:00:00';
+            const hour = parseInt(timeField.split(':')[0], 10);
             if (hour >= 6 && hour < 12) timeSlots['Morning (6AM-12PM)']++;
             else if (hour >= 12 && hour < 17) timeSlots['Afternoon (12PM-5PM)']++;
             else if (hour >= 17 && hour < 21) timeSlots['Evening (5PM-9PM)']++;
@@ -324,11 +327,15 @@ class ChartManager {
     }
     
     updateAllCharts(data, personStats) {
-        this.renderMainLineChart(data);
-        this.renderTimeOfDayChart(data);
-        this.renderHighestCallsChart(personStats);
-        this.renderCallsDoughnutChart(personStats);
-        this.renderTopTalkersChart(personStats);
+        const safeRender = (fn, ...args) => {
+            try { fn.apply(this, args); }
+            catch(e) { console.error('Chart render error:', e); }
+        };
+        safeRender(this.renderMainLineChart, data);
+        safeRender(this.renderTimeOfDayChart, data);
+        safeRender(this.renderHighestCallsChart, personStats || []);
+        safeRender(this.renderCallsDoughnutChart, personStats || []);
+        safeRender(this.renderTopTalkersChart, personStats || []);
     }
     
     // Explicitly update analytics charts when section is shown
